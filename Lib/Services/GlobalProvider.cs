@@ -1,6 +1,6 @@
-﻿using Decal.Adapter;
+﻿using System;
+using Decal.Adapter;
 using Decal.Adapter.Wrappers;
-using System;
 
 namespace Commander.Lib.Services
 {

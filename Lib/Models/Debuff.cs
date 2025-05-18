@@ -1,5 +1,5 @@
-﻿using Decal.Adapter.Wrappers;
-using System;
+﻿using System;
+using Decal.Adapter.Wrappers;
 
 namespace Commander.Lib.Models
 {

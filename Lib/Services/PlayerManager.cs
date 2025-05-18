@@ -1,7 +1,5 @@
 ﻿using Commander.Lib.Models;
 using Commander.Models;
-using Decal.Adapter;
-using Decal.Adapter.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.IO;
