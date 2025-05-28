@@ -63,40 +63,20 @@ namespace Commander.Lib.Controllers
 
         private void _processPlayerObject(WorldObject wo)
         {
-            Settings settings = _settingsManager.Settings;
-            LoginSession session = _loginSessionManager.Session;
-
-            int woMonarch = wo.Values(LongValueKey.Monarch);
-            string woName = wo.Name;
-            int woId = wo.Id;
-            int id = session.Id;
-            int monarch = session.Monarch;
-            bool self = woId == id;
-
-            var friendsList = _settingsManager.GlobalSettings.Friends
-                .Select(f => f.ToLower())
-                .ToList();
-
-            _logger.Info($"Friends list count: {friendsList.Count}");
-
-            bool enemy = true;
-
-            if (woMonarch == monarch)
-                enemy = false;
-
-            if (friendsList.Contains(wo.Name.ToLower()))
-                enemy = false;
+            int currentId = WorldObjectService.GetSelf().Id;
+            var enemy = _playerManager.IsEnemy(wo.Id);
+            bool self = wo.Id == currentId;
 
             if (self)
                 return;
 
-            if (_playerManager.Get(woId) != null)
+            if (_playerManager.Get(wo.Id) != null)
             {
                 //WorldObjectService.RequestId(woId);
                 return;
             }
 
-            double distance = WorldObjectService.GetDistanceFromPlayer(woId, id);
+            double distance = WorldObjectService.GetDistanceFromPlayer(wo.Id, currentId);
             int playerDistance = Convert.ToInt32(distance);
 
             if (playerDistance > 300)

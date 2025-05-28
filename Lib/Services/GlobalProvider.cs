@@ -21,7 +21,7 @@ namespace Commander.Lib.Services
 
             PluginName = pluginName;
             PluginPath = pluginPath;
-            Version = "1.0.2";
+            Version = "1.0.3";
             Host = host;
             Core = core;
         }

@@ -1,8 +1,10 @@
 ﻿using Commander.Lib.Models;
 using Commander.Models;
+using Decal.Adapter.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Media;
 using System.Reflection;
 using System.Timers;
@@ -20,6 +22,7 @@ namespace Commander.Lib.Services
         Player GetByName(string name);
         void Clear();
         void ClearCache();
+        bool IsEnemy(int id);
         Dictionary<int, Player> PlayersInstance();
         event EventHandler<Player> PlayerAdded;
         event EventHandler<Player> PlayerRemoved;
@@ -68,6 +71,34 @@ namespace Commander.Lib.Services
         public List<int> GetCache()
         {
             return _preSessionPlayerCache;
+        }
+
+        public bool IsEnemy(int otherId)
+        {
+            int currentId = WorldObjectService.GetSelf().Id;
+            WorldObject wo = WorldObjectService.GetWorldObject(otherId);
+            Settings settings = _settingsManager.Settings;
+            LoginSession session = _loginSessionManager.Session;
+
+            int woMonarch = wo.Values(LongValueKey.Monarch);
+            string woName = wo.Name;
+            int woId = wo.Id;
+            int id = session.Id;
+            int monarch = session.Monarch;
+
+            var friendsList = _settingsManager.GlobalSettings.Friends
+                .Select(f => f.ToLower())
+                .ToList();
+
+            bool enemy = true;
+
+            if (woMonarch == monarch)
+                enemy = false;
+
+            if (friendsList.Contains(wo.Name.ToLower()))
+                enemy = false;
+
+            return enemy;
         }
 
         private void _processGhostObjects()

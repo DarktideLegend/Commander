@@ -134,9 +134,6 @@ namespace Commander.Lib.Controllers
         private void _processPutItemInContainer(NetworkMessageEventArgs e)
         {
             int id = e.Message.Value<int>("item");
-
-            _logger.Info(id.ToString());
-
             var obj = WorldObjectService.GetWorldObject(id);
 
             if (obj != null)
@@ -144,8 +141,6 @@ namespace Commander.Lib.Controllers
                 var wcid = obj.Values(LongValueKey.Type);
                 var rareId = obj.Values(LongValueKey.RareId);
 
-                _logger.Info($"Name = {obj.Name}");
-                _logger.Info($"WCID = {wcid}");
                 if (tier4Rares.Contains(wcid) || tier5Rares.Contains(wcid) || tier6Rares.Contains(wcid))
                 {
                     var message = $"You have found the rare item {obj.Name}!";

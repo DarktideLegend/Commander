@@ -98,7 +98,7 @@ namespace Commander.Lib.Controllers
                 WorldObject wo = WorldObjectService.GetWorldObject(id);
                 int woMonarch = wo.Values(LongValueKey.Monarch);
 
-                bool enemy = session.Monarch != woMonarch;
+                bool enemy = _playerManager.IsEnemy(id);
                 bool self = session.Id == id;
                 if (!self)
                 {
