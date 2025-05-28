@@ -40,7 +40,7 @@ namespace Commander.Lib.Controllers
                     _logger.Info("Relogging");
                     _relogManager.Stop();
                     _settingsManager.Settings.Relog = false;
-                    _settingsManager.Write();
+                    _settingsManager.WriteUserSettings();
                 }
             } catch (Exception ex) { _logger.Error(ex); }
         }

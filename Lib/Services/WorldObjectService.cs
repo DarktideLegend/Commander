@@ -54,6 +54,14 @@ namespace Commander.Lib.Services
         {
             CoreManager.Current.Actions.SelectItem(id);
         }
+        public static int BusyState 
+        {
+            get
+            {
+                return CoreManager.Current.Actions.BusyState;
+            }
+        }
+
         public static void CastSpell(int spell, int playerId)
         {
             CoreManager.Current.Actions.CastSpell(spell, playerId);

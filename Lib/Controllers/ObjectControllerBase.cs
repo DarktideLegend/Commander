@@ -4,6 +4,8 @@ using Commander.Models;
 using Decal.Adapter;
 using Decal.Adapter.Wrappers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Commander.Lib.Controllers
 {
@@ -69,8 +71,21 @@ namespace Commander.Lib.Controllers
             int woId = wo.Id;
             int id = session.Id;
             int monarch = session.Monarch;
-            bool enemy = woMonarch != monarch;
             bool self = woId == id;
+
+            var friendsList = _settingsManager.GlobalSettings.Friends
+                .Select(f => f.ToLower())
+                .ToList();
+
+            _logger.Info($"Friends list count: {friendsList.Count}");
+
+            bool enemy = true;
+
+            if (woMonarch == monarch)
+                enemy = false;
+
+            if (friendsList.Contains(wo.Name.ToLower()))
+                enemy = false;
 
             if (self)
                 return;

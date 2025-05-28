@@ -126,7 +126,7 @@ namespace Commander.Lib.Views
             {
                 _logger.WriteToChat($"FriendlyIconChange[EVENT]: {_friendlyIcon.Checked}");
                 _settingsManager.Settings.FriendlyIcon = _friendlyIcon.Checked;
-                _settingsManager.Write();
+                _settingsManager.WriteUserSettings();
                 
                 foreach(PlayerIcon icon in _playerIcons)
                 {
@@ -147,7 +147,7 @@ namespace Commander.Lib.Views
             {
                 _logger.WriteToChat($"EnemyIconChange[EVENT]: {_enemyIcon.Checked}");
                 _settingsManager.Settings.EnemyIcon = _enemyIcon.Checked;
-                _settingsManager.Write();
+                _settingsManager.WriteUserSettings();
 
                 foreach(PlayerIcon icon in _playerIcons)
                 {
@@ -168,7 +168,7 @@ namespace Commander.Lib.Views
             {
                 _logger.WriteToChat($"FriendlySoundsChange[EVENT]: {_friendlySounds.Checked}");
                 _settingsManager.Settings.FriendlySounds = _friendlySounds.Checked;
-                _settingsManager.Write();
+                _settingsManager.WriteUserSettings();
 
             } catch (Exception ex) { _logger.Error(ex); }
         }
@@ -179,7 +179,7 @@ namespace Commander.Lib.Views
             {
                 _logger.WriteToChat($"EnemeySoundsChange[EVENT]: {_enemySounds.Checked}");
                 _settingsManager.Settings.EnemySounds = _enemySounds.Checked;
-                _settingsManager.Write();
+                _settingsManager.WriteUserSettings();
 
             } catch (Exception ex) { _logger.Error(ex); }
         }
@@ -371,7 +371,7 @@ namespace Commander.Lib.Views
                 {
                     _logger.WriteToChat($"MainView.RelogDurationChange[EVENT]: {_relogDuration.Text}");
                     _settingsManager.Settings.RelogDuration = relogDuration;
-                    _settingsManager.Write();
+                    _settingsManager.WriteUserSettings();
                 }
 
             } catch (Exception ex) { _logger.Error(ex); }
@@ -384,7 +384,7 @@ namespace Commander.Lib.Views
             {
                 _logger.WriteToChat($"MainView.RelogChange[EVENT]: {_relog.Checked}");
                 _settingsManager.Settings.Relog = _relog.Checked;
-                _settingsManager.Write();
+                _settingsManager.WriteUserSettings();
 
             } catch (Exception ex) { _logger.Error(ex); }
         }
@@ -397,7 +397,7 @@ namespace Commander.Lib.Views
                 {
                     _logger.WriteToChat($"MainView.VitaeLimitChange[EVENT]: {_vitaeLimit.Text}");
                     _settingsManager.Settings.VitaeLimit = vitaeLimit;
-                    _settingsManager.Write();
+                    _settingsManager.WriteUserSettings();
                 }
 
             } catch (Exception ex) { _logger.Error(ex); }
@@ -409,7 +409,7 @@ namespace Commander.Lib.Views
             {
                 _logger.WriteToChat($"MainView.LogOnVitaeChange[EVENT]: {_logOnVitae.Checked}");
                 _settingsManager.Settings.LogOnVitae = _logOnVitae.Checked;
-                _settingsManager.Write();
+                _settingsManager.WriteUserSettings();
 
             } catch (Exception ex) { _logger.Error(ex); }
         }
@@ -420,7 +420,7 @@ namespace Commander.Lib.Views
             {
                 _logger.WriteToChat($"MainView.LogOnDeathChange[EVENT]: {_logOnDeath.Checked}");
                 _settingsManager.Settings.LogOnDeath = _logOnDeath.Checked;
-                _settingsManager.Write();
+                _settingsManager.WriteUserSettings();
 
             } catch (Exception ex) { _logger.Error(ex); }
         }
@@ -433,7 +433,7 @@ namespace Commander.Lib.Views
 
                 _debugger.Toggle();
                 _settingsManager.Settings.Debug = _debug.Checked;
-                _settingsManager.Write();
+                _settingsManager.WriteUserSettings();
 
             } catch (Exception ex) { _logger.Error(ex); }
         }

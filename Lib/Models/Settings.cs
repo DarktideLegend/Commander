@@ -1,4 +1,6 @@
-﻿namespace Commander.Models
+﻿using System.Collections.Generic;
+
+namespace Commander.Models
 {
     public class Settings
     {
@@ -15,5 +17,20 @@
         public int IconSize = 2;
 
         public delegate Settings Factory();
+
+        public static Settings CreateDefaultSettings()
+        {
+            return new Settings(); 
+        }
+    }
+
+    public class GlobalSettings
+    {
+        public List<string> Friends = new List<string>();
+        public delegate GlobalSettings Factory();
+        public static GlobalSettings CreateDefaultSettings()
+        {
+            return new GlobalSettings(); 
+        }
     }
 }

@@ -1,23 +1,32 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
 using Commander.Models;
+using System;
 
 namespace Commander.Lib.Services
 {
     public interface SettingsManager
     {
-        Settings Read();
-        Settings Write();
+        Settings ReadUserSettings();
+        GlobalSettings ReadGlobalSettings();
+        Settings WriteUserSettings();
+        GlobalSettings WriteGlobalSettings();
         Settings Settings { get; set; }
-        Settings Init(string server, string account, string name);
+        GlobalSettings GlobalSettings { get; set; }
+
+        void Init(string server, string account, string name);
     }
 
     public class SettingsManagerImpl : SettingsManager
     {
         public Settings Settings { get; set; }
+        public GlobalSettings GlobalSettings { get; set; }
         private Logger _logger;
         private Settings.Factory _settingsFactory;
+        private GlobalSettings.Factory _globalSettingsFactory;
         private string _pluginPath;
+        private string _serverPath;
+        private string _serverFilePath;
         private string _characterPath;
         private string _filePath;
         private string _pluginName;
@@ -27,27 +36,36 @@ namespace Commander.Lib.Services
 
         public SettingsManagerImpl(
             Logger logger, 
-            GlobalProvider globals, 
-            Settings.Factory settingsFactory)
+            GlobalProvider globals)
+
         {
             _logger = logger.Scope("SettingsManager");
-            _settingsFactory = settingsFactory;
+            _settingsFactory = Settings.CreateDefaultSettings;
+            _globalSettingsFactory = GlobalSettings.CreateDefaultSettings;
             _pluginPath = globals.PluginPath;
             _pluginName = globals.PluginName;
         }
 
-        public Settings Init(string server, string account, string name)
+        public void Init(string server, string account, string name)
         {
             _server = server;
             _name = name;
             _account = account;
+            _serverPath = $@"{_pluginPath}\{_server}";
             _characterPath = $@"{_pluginPath}\{_server}\{_account}\{_name}";
+            _serverFilePath = $@"{_serverPath}\globals.json";
             _filePath = $@"{_characterPath}\{_pluginName}.json";
 
-            return Read();
+            Read();
         }
 
-        public Settings Write()
+        private void Read()
+        {
+            ReadGlobalSettings();
+            ReadUserSettings();
+        }
+
+        public Settings WriteUserSettings()
         {
             try
             {
@@ -67,7 +85,27 @@ namespace Commander.Lib.Services
             return Settings;
         }
 
-        public Settings Read()
+        public GlobalSettings WriteGlobalSettings()
+        {
+            try
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Formatting = Formatting.Indented;
+                Directory.CreateDirectory(_serverPath);
+                using (StreamWriter sw = new StreamWriter(_serverFilePath))
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    serializer.Serialize(writer, GlobalSettings);
+                }
+
+                _logger.Info($@"Writing to: {_serverFilePath}");
+
+            } catch(IOException ex) { _logger.Error(ex); }
+
+            return GlobalSettings;
+        }
+
+        public Settings ReadUserSettings()
         {
             try
             {
@@ -80,7 +118,7 @@ namespace Commander.Lib.Services
                 else
                 {
                     Settings = _settingsFactory();
-                    Write();
+                    WriteUserSettings();
                 }
 
             } catch (IOException ex)
@@ -90,6 +128,31 @@ namespace Commander.Lib.Services
             }
 
             return Settings;
+        }
+
+        public GlobalSettings ReadGlobalSettings()
+        {
+            try
+            {
+                if (File.Exists(_serverFilePath))
+                {
+                    string jsonString = File.ReadAllText(_serverFilePath);
+                    GlobalSettings = JsonConvert.DeserializeObject<GlobalSettings>(jsonString);
+                    _logger.Info("Global Settings successfully read");
+                }
+                else
+                {
+                    GlobalSettings = _globalSettingsFactory();
+                    WriteGlobalSettings();
+                }
+
+            } catch (IOException ex)
+            {
+                _logger.Error(ex);
+                GlobalSettings = _globalSettingsFactory();
+            }
+
+            return GlobalSettings;
         }
 
     }
