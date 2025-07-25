@@ -29,6 +29,7 @@ namespace Commander.Lib.Views
         private HudCheckBox _relog;
         private HudTextBox _vitaeLimit;
         private HudTextBox _relogDuration;
+        private HudTextBox _relogDistance;
         private HudList _enemyListView;
         private HudList _friendlyListView;
         private List<PlayerIcon> _playerIcons;
@@ -69,6 +70,7 @@ namespace Commander.Lib.Views
                 _vitaeLimit = (HudTextBox)view["VitaeLimit"];
                 _relog = (HudCheckBox)view["Relog"];
                 _relogDuration = (HudTextBox)view["RelogDuration"];
+                _relogDistance = (HudTextBox)view["RelogDistance"];
                 _enemyListView = (HudList)view["EnemyList"];
                 _friendlyListView = (HudList)view["FriendlyList"];
                 _enemySounds = (HudCheckBox)view["EnemySounds"];
@@ -84,6 +86,7 @@ namespace Commander.Lib.Views
                 _vitaeLimit.Text = _settings.VitaeLimit.ToString();
                 _relog.Checked = _settings.Relog;
                 _relogDuration.Text = _settings.RelogDuration.ToString();
+                _relogDistance.Text = _settings.RelogDistance.ToString();
                 _enemySounds.Checked = _settings.EnemySounds;
                 _friendlySounds.Checked = _settings.FriendlySounds;
                 _friendlyIcon.Checked = _settings.FriendlyIcon;
@@ -109,6 +112,7 @@ namespace Commander.Lib.Views
             _vitaeLimit.Change += VitaeLimitChange;
             _relog.Change += RelogChange;
             _relogDuration.Change += RelogDurationChange;
+            _relogDistance.Change += RelogDistanceChange;
             _playerManager.PlayerAdded += _playerManager_PlayerAdded;
             _playerManager.PlayerRemoved += _playerManager_PlayerRemoved;
             _playerManager.PlayerUpdated += _playerManager_PlayerUpdated;
@@ -193,6 +197,7 @@ namespace Commander.Lib.Views
             _vitaeLimit.Change -= VitaeLimitChange;
             _relog.Change -= RelogChange;
             _relogDuration.Change -= RelogDurationChange;
+            _relogDistance.Change -= RelogDistanceChange;
             _playerManager.PlayerAdded -= _playerManager_PlayerAdded;
             _playerManager.PlayerRemoved -= _playerManager_PlayerRemoved;
             _playerManager.PlayerUpdated -= _playerManager_PlayerUpdated;
@@ -371,6 +376,20 @@ namespace Commander.Lib.Views
                 {
                     _logger.WriteToChat($"MainView.RelogDurationChange[EVENT]: {_relogDuration.Text}");
                     _settingsManager.Settings.RelogDuration = relogDuration;
+                    _settingsManager.WriteUserSettings();
+                }
+
+            } catch (Exception ex) { _logger.Error(ex); }
+
+        }
+        private void RelogDistanceChange(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Int32.TryParse(_relogDistance.Text, out int relogDistance) && relogDistance >= 1 && relogDistance <= 1000)
+                {
+                    _logger.WriteToChat($"MainView.RelogDistanceChange[EVENT]: {_relogDistance.Text}");
+                    _settingsManager.Settings.RelogDistance = relogDistance;
                     _settingsManager.WriteUserSettings();
                 }
 

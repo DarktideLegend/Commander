@@ -79,7 +79,7 @@ namespace Commander.Lib.Controllers
             double distance = WorldObjectService.GetDistanceFromPlayer(wo.Id, currentId);
             int playerDistance = Convert.ToInt32(distance);
 
-            if (playerDistance > 500)
+            if (playerDistance > _settingsManager.Settings.RelogDistance)
                 return;
 
             if (enemy)
