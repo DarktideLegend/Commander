@@ -73,9 +73,6 @@ namespace Commander.Lib.Services
         {
             try
             {
-                if (!_globals.Relogging)
-                    return;
-
                 int relogDuration = _settingsManager.Settings.RelogDuration;
 
                 _remaining = (TimeSpan.FromMinutes(Convert.ToDouble(relogDuration)) - (DateTime.Now - _startTime));
