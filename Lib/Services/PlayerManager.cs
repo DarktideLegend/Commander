@@ -36,6 +36,8 @@ namespace Commander.Lib.Services
         private SettingsManager _settingsManager;
         private List<int> _preSessionPlayerCache = new List<int>();
         private Dictionary<int, Player> _players = new Dictionary<int, Player>();
+        public Dictionary<int, Player> Enemies = new Dictionary<int, Player>();
+        public Dictionary<int, Player> Friends = new Dictionary<int, Player>();
         private Timer _ghostObjectTimer;
         private bool isPlayingSound = false;
 
@@ -169,6 +171,11 @@ namespace Commander.Lib.Services
         public void Remove(int id, Player player)
         {
             _players.Remove(id);
+            if (player.Enemy && Enemies.TryGetValue(player.Id, out var _))
+                Enemies.Remove(player.Id);
+            else if (!player.Enemy && Friends.TryGetValue(player.Id, out var _))
+                Friends.Remove(player.Id);
+
             OnPlayerRemoved(player);
             _logger.WriteToChat($"Player Removed: {player.Name}");
         }
@@ -191,6 +198,11 @@ namespace Commander.Lib.Services
                 return;
 
             _players.Add(player.Id, player);
+            if (player.Enemy && Enemies.TryGetValue(player.Id, out var _))
+                Enemies.Add(player.Id, player);
+            else if (!player.Enemy && Friends.TryGetValue(player.Id, out var _))
+                Friends.Add(player.Id, player);
+
             OnPlayerAdded(player);
 
             if (session == null)
