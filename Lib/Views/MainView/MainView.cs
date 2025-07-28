@@ -6,6 +6,7 @@ using Decal.Adapter.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using VirindiViewService.Controls;
 
 namespace Commander.Lib.Views
@@ -32,9 +33,17 @@ namespace Commander.Lib.Views
         private HudTextBox _relogDistance;
         private HudList _enemyListView;
         private HudList _friendlyListView;
+        private HudStaticText _enemyLabel;
+        private HudStaticText _friendlyLabel;
+        private HudFixedLayout _wrapper;
+        private HudFixedLayout _playersView;
+        private HudTabView _tabs;
+
         private List<PlayerIcon> _playerIcons;
         private List<DebuffObj> _debuffObjects;
         private PlayerIcon.Factory _playerIconFactory;
+
+        private PlayerManager PlayerManager => _playerManager;
 
         const int FriendlyIcon = 100675625;	
         const int EnemyIcon = 100690759;
@@ -64,6 +73,9 @@ namespace Commander.Lib.Views
                 _logger.Info("Init()");
 
                 CreateFromXMLResource("Commander.Lib.Views.MainView.mainView.xml");
+                _wrapper = (HudFixedLayout)view["Wrapper"];
+                _playersView = (HudFixedLayout)view["PlayersView"];
+                _tabs = (HudTabView)view["Tabs"];
                 _debug = (HudCheckBox)view["DebugCheckBox"];
                 _logOnDeath = (HudCheckBox)view["LogOnDeath"];
                 _logOnVitae = (HudCheckBox)view["LogOnVitae"];
@@ -77,6 +89,8 @@ namespace Commander.Lib.Views
                 _friendlySounds = (HudCheckBox)view["FriendlySounds"];
                 _friendlyIcon = (HudCheckBox)view["FriendlyIcon"];
                 _enemyIcon = (HudCheckBox)view["EnemyIcon"];
+                _enemyLabel = (HudStaticText)view.Controls["EnemyLabel"];
+                _friendlyLabel = (HudStaticText)view["FriendlyLabel"];
 
                 _settings = _settingsManager.Settings;
 
@@ -122,6 +136,58 @@ namespace Commander.Lib.Views
             _friendlySounds.Change += _friendlySounds_Change;
             _enemyIcon.Change += _enemyIcon_Change;
             _friendlyIcon.Change += _friendlyIcon_Change;
+            _playerManager.PlayerAdded += _player_Change;
+            _playerManager.PlayerRemoved += _player_Change;
+            view.Resize += _mainView_Resize;
+        }
+
+
+        private void UnRegisterEvents()
+        {
+            _logger.Info("UnRegisterEvents()");
+            _debug.Change -= DebugChange;
+            _logOnDeath.Change -= LogOnDeathChange;
+            _logOnVitae.Change -= LogOnVitaeChange;
+            _vitaeLimit.Change -= VitaeLimitChange;
+            _relog.Change -= RelogChange;
+            _relogDuration.Change -= RelogDurationChange;
+            _relogDistance.Change -= RelogDistanceChange;
+            _playerManager.PlayerAdded -= _playerManager_PlayerAdded;
+            _playerManager.PlayerRemoved -= _playerManager_PlayerRemoved;
+            _playerManager.PlayerUpdated -= _playerManager_PlayerUpdated;
+            _enemyListView.Click -= _enemyListView_Click;
+            _friendlyListView.Click -= _friendlyListView_Click;
+            _enemySounds.Change -=_enemySounds_Change;
+            _friendlySounds.Change -= _enemySounds_Change;
+            _friendlyIcon.Change -= _friendlyIcon_Change;
+            _enemyIcon.Change -= _enemyIcon_Change;
+        }
+
+        private void _player_Change(object sender, Player e)
+        {
+            _enemyLabel.Text = $"Enemies: ({_enemyListView.RowCount})";
+            _friendlyLabel.Text = $"Friends: ({_friendlyListView.RowCount})";
+        }
+
+        private void _mainView_Resize(object sender, EventArgs e)
+        {
+            try
+            {
+                var width = view.Width;
+                var height = view.Height;
+                _logger.Info("MainView.Resize[EVENT]");
+                _wrapper.SetControlRect(_tabs, new Rectangle(0, 0, width, height));
+                _playersView.SetControlRect(_enemyLabel, new Rectangle(10, 0, width - 20, 20));
+                _playersView.SetControlRect(_enemyListView, new Rectangle(10, 25, width - 20, (height / 2) - 25));
+                _playersView.SetControlRect(_friendlyLabel, new Rectangle(10, (height / 2), width - 20, 20));
+                _playersView.SetControlRect(_friendlyListView, new Rectangle(10, (height / 2) + 25, width - 20, (height / 2) - 25));
+                _enemyLabel.Text = $"Enemies: ({_enemyListView.RowCount})";
+                _friendlyLabel.Text = $"Friends: ({_friendlyListView.RowCount})";
+
+
+            } catch (Exception ex) {
+                _logger.Error(ex); 
+            }
         }
 
         private void _friendlyIcon_Change(object sender, EventArgs e)
@@ -188,26 +254,7 @@ namespace Commander.Lib.Views
             } catch (Exception ex) { _logger.Error(ex); }
         }
 
-        private void UnRegisterEvents()
-        {
-            _logger.Info("UnRegisterEvents()");
-            _debug.Change -= DebugChange;
-            _logOnDeath.Change -= LogOnDeathChange;
-            _logOnVitae.Change -= LogOnVitaeChange;
-            _vitaeLimit.Change -= VitaeLimitChange;
-            _relog.Change -= RelogChange;
-            _relogDuration.Change -= RelogDurationChange;
-            _relogDistance.Change -= RelogDistanceChange;
-            _playerManager.PlayerAdded -= _playerManager_PlayerAdded;
-            _playerManager.PlayerRemoved -= _playerManager_PlayerRemoved;
-            _playerManager.PlayerUpdated -= _playerManager_PlayerUpdated;
-            _enemyListView.Click -= _enemyListView_Click;
-            _friendlyListView.Click -= _friendlyListView_Click;
-            _enemySounds.Change -=_enemySounds_Change;
-            _friendlySounds.Change -= _enemySounds_Change;
-            _friendlyIcon.Change -= _friendlyIcon_Change;
-            _enemyIcon.Change -= _enemyIcon_Change;
-        }
+
 
         private void _playerManager_PlayerUpdated(object sender, Player player)
         {
