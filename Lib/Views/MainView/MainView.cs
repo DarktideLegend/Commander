@@ -106,6 +106,10 @@ namespace Commander.Lib.Views
                 _friendlyIcon.Checked = _settings.FriendlyIcon;
                 _enemyIcon.Checked = _settings.EnemyIcon;
 
+                view.Location = new Point(_settings.UIX, _settings.UIY);
+                view.Width = _settings.UIWidth;
+                view.Height = _settings.UIHeight;
+
                 foreach (KeyValuePair<int, Player> entry in _playerManager.PlayersInstance())
                 {
                     _processPlayerAdd(entry.Value);
@@ -175,6 +179,9 @@ namespace Commander.Lib.Views
             {
                 var width = view.Width;
                 var height = view.Height;
+                var x = view.Location.X;
+                var y = view.Location.Y;
+
                 _logger.Info("MainView.Resize[EVENT]");
                 _wrapper.SetControlRect(_tabs, new Rectangle(0, 0, width, height));
                 _playersView.SetControlRect(_enemyLabel, new Rectangle(10, 0, width - 20, 20));
@@ -184,6 +191,7 @@ namespace Commander.Lib.Views
                 _enemyLabel.Text = $"Enemies: ({_enemyListView.RowCount})";
                 _friendlyLabel.Text = $"Friends: ({_friendlyListView.RowCount})";
 
+                _settingsManager.SaveUISettings(x, y, width, height);
 
             } catch (Exception ex) {
                 _logger.Error(ex); 
@@ -302,7 +310,7 @@ namespace Commander.Lib.Views
                     }
                 }
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            } catch (Exception ex) { _logger.Warn(ex.Message); }
         }
 
         private void _enemyListView_Click(object sender, int row, int col)

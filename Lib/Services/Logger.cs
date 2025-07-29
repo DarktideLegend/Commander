@@ -8,6 +8,7 @@ namespace Commander.Lib.Services
     {
         void Info(string message);
         void Error(Exception ex);
+        void Warn(string message);
         void WriteToChat(string message);
         void WriteToWindow(string message);
         Logger Scope(string scope);
@@ -38,6 +39,13 @@ namespace Commander.Lib.Services
         public void Info(string message)
         {
             Console.WriteLine(Message(message, "INFO"));
+        }
+
+        public void Warn(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow; 
+            Console.WriteLine(Message(message, "WARN"));   
+            Console.ResetColor();                         
         }
 
         private string Message(string message, string level)

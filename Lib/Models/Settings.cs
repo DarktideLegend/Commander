@@ -16,6 +16,10 @@ namespace Commander.Models
         public bool EnemyIcon = true;
         public bool FriendlyIcon = true;
         public int IconSize = 2;
+        public int UIHeight = 200;
+        public int UIWidth = 200;
+        public int UIX = 50;
+        public int UIY = 50;
 
         public delegate Settings Factory();
 

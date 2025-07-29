@@ -11,6 +11,7 @@ namespace Commander.Lib.Services
         GlobalSettings ReadGlobalSettings();
         Settings WriteUserSettings();
         GlobalSettings WriteGlobalSettings();
+        void SaveUISettings(int x, int y, int width, int height);
         Settings Settings { get; set; }
         GlobalSettings GlobalSettings { get; set; }
 
@@ -153,6 +154,15 @@ namespace Commander.Lib.Services
             }
 
             return GlobalSettings;
+        }
+
+        public void SaveUISettings(int x, int y, int width, int height)
+        {
+                Settings.UIX = x;
+                Settings.UIY = y;
+                Settings.UIWidth = width;
+                Settings.UIHeight = height;
+                WriteUserSettings();
         }
 
     }

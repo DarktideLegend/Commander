@@ -84,7 +84,10 @@ namespace Commander.Lib.Controllers
                 _mainView.Init();
                 _vitaeTimer.Start();
                 _handleCachedPlayers();
-            } catch (Exception ex) { _logger.Error(ex); }
+            } catch (Exception ex) {
+                _logger.Error(ex);
+                Environment.Exit(1);
+            }
         }
 
         private void _handleCachedPlayers()
