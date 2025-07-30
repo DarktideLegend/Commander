@@ -126,7 +126,8 @@ namespace Commander.Lib.Controllers
             if (WorldObjectService.IsPlayer(wo.Id))
             {
                 _processPlayerObject(wo);
-            } 
+            }
         }
     }
 }
+

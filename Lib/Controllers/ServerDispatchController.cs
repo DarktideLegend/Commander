@@ -39,7 +39,8 @@ namespace Commander.Lib.Controllers
 
         public void Init(object sender, NetworkMessageEventArgs e)
         {
-            try {
+            try
+            {
                 int messageType = e.Message.Type;
 
                 if (messageType == 63408 && e.Message.Value<int>("event") == 201)
@@ -62,7 +63,8 @@ namespace Commander.Lib.Controllers
                     _processPlayerKilled(e);
                 }
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _processPlayerKilled(NetworkMessageEventArgs e)
@@ -123,8 +125,8 @@ namespace Commander.Lib.Controllers
 
             if (gameEvent == 201) // IdentifyObject
                 return;
-                //_processIndentifyObject(e);
-                
+            //_processIndentifyObject(e);
+
         }
 
         private HashSet<int> tier4Rares = new HashSet<int>() { 30352, 30353, 30354, 30355, 30356, 30357, 30358, 30359, 30360, 30361, 30362, 30363, 30364, 30365, 30366, 30367, 30368, 30369, 30370, 30371, 30372, 30373, 30510, 30511, 30512, 30513, 30514, 30515, 30516, 30517, 30518, 30519, 30520, 30521, 30522, 30523, 30524, 30525, 30526, 30527, 30528, 30529, 30530, 30531, 30532, 30533, 30534 };
@@ -171,7 +173,7 @@ namespace Commander.Lib.Controllers
             }
         }
 
-        private void _processPlayerIdentified(NetworkMessageEventArgs e,  Player player)
+        private void _processPlayerIdentified(NetworkMessageEventArgs e, Player player)
         {
             int health = e.Message.Value<int>("health");
             int healthMax = e.Message.Value<int>("healthMax");
@@ -192,3 +194,4 @@ namespace Commander.Lib.Controllers
 
 
 }
+

@@ -45,7 +45,7 @@ namespace Commander.Lib.Views
 
         private PlayerManager PlayerManager => _playerManager;
 
-        const int FriendlyIcon = 100675625;	
+        const int FriendlyIcon = 100675625;
         const int EnemyIcon = 100690759;
 
         public MainView(
@@ -118,7 +118,8 @@ namespace Commander.Lib.Views
                 _debuffObjects = new List<DebuffObj>();
                 _playerIcons = new List<PlayerIcon>();
                 RegisterEvents();
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void RegisterEvents()
@@ -161,7 +162,7 @@ namespace Commander.Lib.Views
             _playerManager.PlayerUpdated -= _playerManager_PlayerUpdated;
             _enemyListView.Click -= _enemyListView_Click;
             _friendlyListView.Click -= _friendlyListView_Click;
-            _enemySounds.Change -=_enemySounds_Change;
+            _enemySounds.Change -= _enemySounds_Change;
             _friendlySounds.Change -= _enemySounds_Change;
             _friendlyIcon.Change -= _friendlyIcon_Change;
             _enemyIcon.Change -= _enemyIcon_Change;
@@ -193,8 +194,10 @@ namespace Commander.Lib.Views
 
                 _settingsManager.SaveUISettings(x, y, width, height);
 
-            } catch (Exception ex) {
-                _logger.Error(ex); 
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
             }
         }
 
@@ -205,18 +208,19 @@ namespace Commander.Lib.Views
                 _logger.WriteToChat($"FriendlyIconChange[EVENT]: {_friendlyIcon.Checked}");
                 _settingsManager.Settings.FriendlyIcon = _friendlyIcon.Checked;
                 _settingsManager.WriteUserSettings();
-                
-                foreach(PlayerIcon icon in _playerIcons)
+
+                foreach (PlayerIcon icon in _playerIcons)
                 {
                     Player player = _playerManager.Get(icon.Id);
-                    
+
                     if (player != null && !player.Enemy)
                     {
                         icon.Icon.Visible = _settings.FriendlyIcon;
                     }
                 }
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _enemyIcon_Change(object sender, EventArgs e)
@@ -227,17 +231,18 @@ namespace Commander.Lib.Views
                 _settingsManager.Settings.EnemyIcon = _enemyIcon.Checked;
                 _settingsManager.WriteUserSettings();
 
-                foreach(PlayerIcon icon in _playerIcons)
+                foreach (PlayerIcon icon in _playerIcons)
                 {
                     Player player = _playerManager.Get(icon.Id);
-                    
+
                     if (player != null && player.Enemy)
                     {
                         icon.Icon.Visible = _settings.EnemyIcon;
                     }
                 }
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _friendlySounds_Change(object sender, EventArgs e)
@@ -248,7 +253,8 @@ namespace Commander.Lib.Views
                 _settingsManager.Settings.FriendlySounds = _friendlySounds.Checked;
                 _settingsManager.WriteUserSettings();
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _enemySounds_Change(object sender, EventArgs e)
@@ -259,7 +265,8 @@ namespace Commander.Lib.Views
                 _settingsManager.Settings.EnemySounds = _enemySounds.Checked;
                 _settingsManager.WriteUserSettings();
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
 
@@ -281,7 +288,7 @@ namespace Commander.Lib.Views
                 }
 
                 int index = 0;
-                foreach(DebuffInformation info in player.Debuffs)
+                foreach (DebuffInformation info in player.Debuffs)
                 {
                     int spell = info.Spell;
                     if (info.MapDebuffToIcon(spell) != null && WorldObjectService.IsValidObject(player.Id))
@@ -297,20 +304,21 @@ namespace Commander.Lib.Views
                         obj.OrientToCamera(true);
                         obj.POrbit = 2f;
                         obj.ROrbit = 0.5f;
-                        obj.AnimationPhaseOffset =  index * ((2f / 8f));
+                        obj.AnimationPhaseOffset = index * ((2f / 8f));
                         obj.Visible = true;
                         DebuffObj debuffObj = _debuffObjFactory(
                             player.Id,
                             info.Spell,
                             icon,
                             obj);
-                        
+
                         _debuffObjects.Add(debuffObj);
                         ++index;
                     }
                 }
 
-            } catch (Exception ex) { _logger.Warn(ex.Message); }
+            }
+            catch (Exception ex) { _logger.Warn(ex.Message); }
         }
 
         private void _enemyListView_Click(object sender, int row, int col)
@@ -319,7 +327,8 @@ namespace Commander.Lib.Views
             {
                 _processListView_Clicked(_enemyListView, row, col);
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _friendlyListView_Click(object sender, int row, int col)
@@ -328,7 +337,8 @@ namespace Commander.Lib.Views
             {
                 _processListView_Clicked(_friendlyListView, row, col);
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _processListView_Clicked(HudList listView, int row, int col)
@@ -354,11 +364,12 @@ namespace Commander.Lib.Views
 
                 if (col == 3)
                 {
-                    
-                   WorldObjectService.CastSpell(2082, player.Id);
+
+                    WorldObjectService.CastSpell(2082, player.Id);
                 }
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _playerManager_PlayerRemoved(object sender, Player player)
@@ -367,14 +378,15 @@ namespace Commander.Lib.Views
             {
                 _processPlayerRemove(player);
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _processPlayerRemove(Player player)
         {
             PlayerIcon playerIcon = _playerIcons.Find(icon => icon.Id == player.Id);
 
-            if (playerIcon != null) 
+            if (playerIcon != null)
                 playerIcon.Icon.Dispose();
 
             _playerIcons.Remove(playerIcon);
@@ -395,7 +407,8 @@ namespace Commander.Lib.Views
             {
                 _processPlayerAdd(player);
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void _processPlayerAdd(Player player)
@@ -418,8 +431,8 @@ namespace Commander.Lib.Views
             if (!enemy)
             {
                 ((HudStaticText)row[1]).TextColor = Color.LightGreen;
-                ((HudPictureBox) row[2]).Image = 100670841;
-                ((HudPictureBox) row[3]).Image = 100670842;
+                ((HudPictureBox)row[2]).Image = 100670841;
+                ((HudPictureBox)row[3]).Image = 100670842;
             }
         }
 
@@ -434,7 +447,8 @@ namespace Commander.Lib.Views
                     _settingsManager.WriteUserSettings();
                 }
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
 
         }
         private void RelogDistanceChange(object sender, EventArgs e)
@@ -448,7 +462,8 @@ namespace Commander.Lib.Views
                     _settingsManager.WriteUserSettings();
                 }
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
 
         }
 
@@ -460,7 +475,8 @@ namespace Commander.Lib.Views
                 _settingsManager.Settings.Relog = _relog.Checked;
                 _settingsManager.WriteUserSettings();
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void VitaeLimitChange(object sender, EventArgs e)
@@ -474,7 +490,8 @@ namespace Commander.Lib.Views
                     _settingsManager.WriteUserSettings();
                 }
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void LogOnVitaeChange(object sender, EventArgs e)
@@ -485,7 +502,8 @@ namespace Commander.Lib.Views
                 _settingsManager.Settings.LogOnVitae = _logOnVitae.Checked;
                 _settingsManager.WriteUserSettings();
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void LogOnDeathChange(object sender, EventArgs e)
@@ -496,7 +514,8 @@ namespace Commander.Lib.Views
                 _settingsManager.Settings.LogOnDeath = _logOnDeath.Checked;
                 _settingsManager.WriteUserSettings();
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         private void DebugChange(object sender, EventArgs e)
@@ -509,7 +528,8 @@ namespace Commander.Lib.Views
                 _settingsManager.Settings.Debug = _debug.Checked;
                 _settingsManager.WriteUserSettings();
 
-            } catch (Exception ex) { _logger.Error(ex); }
+            }
+            catch (Exception ex) { _logger.Error(ex); }
         }
 
         new public void Dispose()
@@ -522,7 +542,7 @@ namespace Commander.Lib.Views
 
         private void _clearDebuffObjects()
         {
-            foreach(DebuffObj debuffObj in _debuffObjects)
+            foreach (DebuffObj debuffObj in _debuffObjects)
             {
                 debuffObj.D3DObject.Dispose();
             }
@@ -532,7 +552,7 @@ namespace Commander.Lib.Views
 
         private void _clearIcons()
         {
-            foreach(PlayerIcon playerIcon in _playerIcons)
+            foreach (PlayerIcon playerIcon in _playerIcons)
             {
                 playerIcon.Icon.Dispose();
             }
@@ -541,3 +561,4 @@ namespace Commander.Lib.Views
         }
     }
 }
+

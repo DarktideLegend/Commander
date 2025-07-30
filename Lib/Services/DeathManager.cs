@@ -28,7 +28,7 @@ namespace Commander.Lib.Services
             _logger = logger.Scope("DeathManager");
             _settingsManager = settingsManager;
             _globals = globals;
-            _relogManager = relogManager;   
+            _relogManager = relogManager;
         }
 
         public void ProcessPkDeath(int killerId, int killedId, string deathMessage)
@@ -119,3 +119,4 @@ namespace Commander.Lib.Services
         }
     }
 }
+

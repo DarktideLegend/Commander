@@ -25,7 +25,7 @@ namespace Commander.Models
 
         public static Settings CreateDefaultSettings()
         {
-            return new Settings(); 
+            return new Settings();
         }
     }
 
@@ -35,7 +35,8 @@ namespace Commander.Models
         public delegate GlobalSettings Factory();
         public static GlobalSettings CreateDefaultSettings()
         {
-            return new GlobalSettings(); 
+            return new GlobalSettings();
         }
     }
 }
+
