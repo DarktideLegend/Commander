@@ -16,13 +16,19 @@ namespace Commander.Lib.Services
     {
         private Logger _logger;
         private SettingsManager _settingsManager;
+        private GlobalProvider _globals;
+        private RelogManager _relogManager;
 
         public DeathManagerImpl(
             Logger logger,
-            SettingsManager settingsManager)
+            SettingsManager settingsManager,
+            GlobalProvider globals,
+            RelogManager relogManager)
         {
             _logger = logger.Scope("DeathManager");
             _settingsManager = settingsManager;
+            _globals = globals;
+            _relogManager = relogManager;
         }
 
         public void ProcessPkDeath(int killerId, int killedId, string deathMessage)
@@ -80,9 +86,19 @@ namespace Commander.Lib.Services
 
         private void _processLogOnDeath(string deathMessage)
         {
+            bool relogging = _globals.Relogging;
+
+            if (relogging)
+            {
+                _relogManager.Stop();
+                _settingsManager.Settings.Relog = false;
+                _settingsManager.WriteUserSettings();
+            }
+
             _logger.Info("_processLogOnDeath()");
             _logger.WriteToChat(deathMessage);
             _logger.WriteToWindow(deathMessage);
+
             WorldObjectService.Logout();
             return;
         }
@@ -103,3 +119,4 @@ namespace Commander.Lib.Services
         }
     }
 }
+

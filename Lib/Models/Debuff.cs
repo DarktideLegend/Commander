@@ -1,5 +1,5 @@
-﻿using Decal.Adapter.Wrappers;
-using System;
+﻿using System;
+using Decal.Adapter.Wrappers;
 
 namespace Commander.Lib.Models
 {
@@ -85,4 +85,5 @@ namespace Commander.Lib.Models
         NULL = 100692970,
     }
 }
+
 

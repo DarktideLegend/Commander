@@ -81,6 +81,8 @@ namespace Commander.Lib.Views
                     properties.Title = string.Format($@"{_globals.PluginName} v{_globals.Version}");
 
                 view = new VirindiViewService.HudView(properties, controls);
+                view.UserResizeable = true;
+                view.MinimumClientArea = new Size(325, 225);
                 view.VisibleChanged += View_VisibleChanged;
             } catch (Exception ex) { _logger.Error(ex); }
         }

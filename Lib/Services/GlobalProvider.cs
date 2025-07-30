@@ -1,6 +1,7 @@
-﻿using Decal.Adapter;
+﻿using System;
+using System.Reflection;
+using Decal.Adapter;
 using Decal.Adapter.Wrappers;
-using System;
 
 namespace Commander.Lib.Services
 {
@@ -18,12 +19,14 @@ namespace Commander.Lib.Services
             string pluginName = "Commander";
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             string pluginPath = $@"{documentsPath}\Decal Plugins\{pluginName}";
+            var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
 
             PluginName = pluginName;
             PluginPath = pluginPath;
-            Version = "1.0.1";
+            Version = assemblyVersion.ToString();
             Host = host;
             Core = core;
         }
     }
 }
+

@@ -4,6 +4,8 @@ using Commander.Models;
 using Decal.Adapter;
 using Decal.Adapter.Wrappers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Commander.Lib.Controllers
 {
@@ -61,30 +63,23 @@ namespace Commander.Lib.Controllers
 
         private void _processPlayerObject(WorldObject wo)
         {
-            Settings settings = _settingsManager.Settings;
-            LoginSession session = _loginSessionManager.Session;
-
-            int woMonarch = wo.Values(LongValueKey.Monarch);
-            string woName = wo.Name;
-            int woId = wo.Id;
-            int id = session.Id;
-            int monarch = session.Monarch;
-            bool enemy = woMonarch != monarch;
-            bool self = woId == id;
+            int currentId = WorldObjectService.GetSelf().Id;
+            var enemy = _playerManager.IsEnemy(wo.Id);
+            bool self = wo.Id == currentId;
 
             if (self)
                 return;
 
-            if (_playerManager.Get(woId) != null)
+            if (_playerManager.Get(wo.Id) != null)
             {
                 //WorldObjectService.RequestId(woId);
                 return;
             }
 
-            double distance = WorldObjectService.GetDistanceFromPlayer(woId, id);
+            double distance = WorldObjectService.GetDistanceFromPlayer(wo.Id, currentId);
             int playerDistance = Convert.ToInt32(distance);
 
-            if (playerDistance > 300)
+            if (playerDistance > _settingsManager.Settings.RelogDistance)
                 return;
 
             if (enemy)
@@ -131,7 +126,8 @@ namespace Commander.Lib.Controllers
             if (WorldObjectService.IsPlayer(wo.Id))
             {
                 _processPlayerObject(wo);
-            } 
+            }
         }
     }
 }
+

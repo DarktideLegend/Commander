@@ -54,6 +54,14 @@ namespace Commander.Lib.Services
         {
             CoreManager.Current.Actions.SelectItem(id);
         }
+        public static int BusyState
+        {
+            get
+            {
+                return CoreManager.Current.Actions.BusyState;
+            }
+        }
+
         public static void CastSpell(int spell, int playerId)
         {
             CoreManager.Current.Actions.CastSpell(spell, playerId);
@@ -64,10 +72,12 @@ namespace Commander.Lib.Services
             if (WorldObjectService.IsSpellKnown(4310))
             {
                 CastSpell(4310, playerId);
-            } else
+            }
+            else
             {
                 CastSpell(2072, playerId);
             }
         }
     }
 }
+

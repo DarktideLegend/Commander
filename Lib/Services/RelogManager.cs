@@ -58,6 +58,7 @@ namespace Commander.Lib.Services
             LoginSession session = _loginSessionManager.Session;
             _globals.Relogging = false;
             _relogTimer.Stop();
+            _logger.Info("Stop()");
             _logger.WriteToWindow($"{session.Server}-{session.AccountName}-{session.Name}");
         }
 
@@ -65,6 +66,7 @@ namespace Commander.Lib.Services
         {
             _startTime = DateTime.Now;
             _relogTimer.Start();
+            _logger.Info("Start()");
         }
 
         private void RelogTimerChecker(object sender, ElapsedEventArgs e)
