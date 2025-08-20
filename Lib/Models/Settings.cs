@@ -7,6 +7,7 @@ namespace Commander.Models
         public bool Debug = false;
         public bool LogOnDeath = true;
         public bool LogOnVitae = true;
+        public bool LogOnRare = true;
         public bool Relog = false;
         public bool EnemySounds = true;
         public bool FriendlySounds = true;

@@ -23,6 +23,7 @@ namespace Commander.Lib.Views
         private HudCheckBox _debug;
         private HudCheckBox _logOnDeath;
         private HudCheckBox _logOnVitae;
+        private HudCheckBox _logOnRare;
         private HudCheckBox _enemySounds;
         private HudCheckBox _friendlySounds;
         private HudCheckBox _friendlyIcon;
@@ -79,6 +80,7 @@ namespace Commander.Lib.Views
                 _debug = (HudCheckBox)view["DebugCheckBox"];
                 _logOnDeath = (HudCheckBox)view["LogOnDeath"];
                 _logOnVitae = (HudCheckBox)view["LogOnVitae"];
+                _logOnRare = (HudCheckBox)view["LogOnRare"];
                 _vitaeLimit = (HudTextBox)view["VitaeLimit"];
                 _relog = (HudCheckBox)view["Relog"];
                 _relogDuration = (HudTextBox)view["RelogDuration"];
@@ -97,6 +99,8 @@ namespace Commander.Lib.Views
                 _debug.Checked = _settings.Debug;
                 _logOnDeath.Checked = _settings.LogOnDeath;
                 _logOnVitae.Checked = _settings.LogOnVitae;
+                _logOnRare.Checked = _settings.LogOnRare;
+
                 _vitaeLimit.Text = _settings.VitaeLimit.ToString();
                 _relog.Checked = _settings.Relog;
                 _relogDuration.Text = _settings.RelogDuration.ToString();
@@ -128,6 +132,7 @@ namespace Commander.Lib.Views
             _debug.Change += DebugChange;
             _logOnDeath.Change += LogOnDeathChange;
             _logOnVitae.Change += LogOnVitaeChange;
+            _logOnRare.Change += LogOnRareChange;
             _vitaeLimit.Change += VitaeLimitChange;
             _relog.Change += RelogChange;
             _relogDuration.Change += RelogDurationChange;
@@ -141,8 +146,6 @@ namespace Commander.Lib.Views
             _friendlySounds.Change += _friendlySounds_Change;
             _enemyIcon.Change += _enemyIcon_Change;
             _friendlyIcon.Change += _friendlyIcon_Change;
-            _playerManager.PlayerAdded += _player_Change;
-            _playerManager.PlayerRemoved += _player_Change;
             view.Resize += _mainView_Resize;
         }
 
@@ -153,6 +156,7 @@ namespace Commander.Lib.Views
             _debug.Change -= DebugChange;
             _logOnDeath.Change -= LogOnDeathChange;
             _logOnVitae.Change -= LogOnVitaeChange;
+            _logOnRare.Change -= LogOnRareChange;
             _vitaeLimit.Change -= VitaeLimitChange;
             _relog.Change -= RelogChange;
             _relogDuration.Change -= RelogDurationChange;
@@ -168,7 +172,7 @@ namespace Commander.Lib.Views
             _enemyIcon.Change -= _enemyIcon_Change;
         }
 
-        private void _player_Change(object sender, Player e)
+        private void _onPlayerChange()
         {
             _enemyLabel.Text = $"Enemies: ({_enemyListView.RowCount})";
             _friendlyLabel.Text = $"Friends: ({_friendlyListView.RowCount})";
@@ -399,6 +403,8 @@ namespace Commander.Lib.Views
                     playersView.RemoveRow(i);
                 }
             }
+
+            _onPlayerChange();
         }
 
         private void _playerManager_PlayerAdded(object sender, Player player)
@@ -434,6 +440,8 @@ namespace Commander.Lib.Views
                 ((HudPictureBox)row[2]).Image = 100670841;
                 ((HudPictureBox)row[3]).Image = 100670842;
             }
+
+            _onPlayerChange();
         }
 
         private void RelogDurationChange(object sender, EventArgs e)
@@ -500,6 +508,18 @@ namespace Commander.Lib.Views
             {
                 _logger.WriteToChat($"MainView.LogOnVitaeChange[EVENT]: {_logOnVitae.Checked}");
                 _settingsManager.Settings.LogOnVitae = _logOnVitae.Checked;
+                _settingsManager.WriteUserSettings();
+
+            }
+            catch (Exception ex) { _logger.Error(ex); }
+        }
+
+        private void LogOnRareChange(object sender, EventArgs e)
+        {
+            try
+            {
+                _logger.WriteToChat($"MainView.LogOnRareChange[EVENT]: {_logOnRare.Checked}");
+                _settingsManager.Settings.LogOnRare = _logOnRare.Checked;
                 _settingsManager.WriteUserSettings();
 
             }
