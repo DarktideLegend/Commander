@@ -1,4 +1,5 @@
-﻿using Commander.Lib.Models;
+﻿using Commander.Lib.Common;
+using Commander.Lib.Models;
 using Commander.Lib.Services;
 using Commander.Models;
 using Decal.Adapter;
@@ -15,7 +16,8 @@ namespace Commander.Lib.Views
     {
         private GlobalProvider _globals;
         private Logger _logger;
-        private Debugger _debugger;
+        private GameClient _gameClient;
+        private DebugManager _debugger;
         private SettingsManager _settingsManager;
         private PlayerManager _playerManager;
         private DebuffObj.Factory _debuffObjFactory;
@@ -46,22 +48,22 @@ namespace Commander.Lib.Views
         private List<PlayerIcon> _playerIcons;
         private List<DebuffObj> _debuffObjects;
         private PlayerIcon.Factory _playerIconFactory;
-
-        private PlayerManager PlayerManager => _playerManager;
-
+        private bool _cleared;
         const int FriendlyIcon = 100675625;
         const int EnemyIcon = 100690759;
 
         public MainView(
             Logger logger,
+            GameClient gameClient,
             GlobalProvider globals,
             PlayerManager playerManager,
             SettingsManager settingsManager,
             DebuffObj.Factory debuffObjFactory,
             PlayerIcon.Factory playerIconfactory,
-            Debugger debugger) : base(logger.Scope("MainView"), globals)
+            DebugManager debugger) : base(logger.Scope("MainView"), globals)
         {
             _logger = logger;
+            _gameClient = gameClient;
             _debugger = debugger;
             _playerManager = playerManager;
             _settingsManager = settingsManager;
@@ -72,10 +74,19 @@ namespace Commander.Lib.Views
 
         public void Init()
         {
+            _globals.Core.CharacterFilter.LoginComplete += CharacterFilter_LoginComplete; 
+            _globals.Core.PluginTermComplete += Core_PluginTermComplete;
+        }
+
+        private void Core_PluginTermComplete(object sender, EventArgs e)
+        {
+            _clear();
+        }
+
+        private void CharacterFilter_LoginComplete(object sender, EventArgs e)
+        {
             try
             {
-                _logger.Info("Init()");
-
                 CreateFromXMLResource("Commander.Lib.Views.MainView.mainView.xml");
                 _wrapper = (HudFixedLayout)view["Wrapper"];
                 _playersView = (HudFixedLayout)view["PlayersView"];
@@ -123,42 +134,41 @@ namespace Commander.Lib.Views
                 view.Width = _settings.UIWidth;
                 view.Height = _settings.UIHeight;
 
+                _debuffObjects = new List<DebuffObj>();
+                _playerIcons = new List<PlayerIcon>();
+
                 foreach (KeyValuePair<int, Player> entry in _playerManager.PlayersInstance())
                 {
                     _processPlayerAdd(entry.Value);
                 }
 
-                _debuffObjects = new List<DebuffObj>();
-                _playerIcons = new List<PlayerIcon>();
-                RegisterEvents();
+                _debug.Change += DebugChange;
+                _logOnDeath.Change += LogOnDeathChange;
+                _logOnVitae.Change += LogOnVitaeChange;
+                _logOnRare.Change += LogOnRareChange;
+                _vitaeLimit.Change += VitaeLimitChange;
+                _relog.Change += RelogChange;
+                _blink.Change += BlinkChange;
+                _blinkMobs.Change += BlinkMobsChange;   
+                _blinkInterval.Change += BlinkIntervalChange;
+                _relogDuration.Change += RelogDurationChange;
+                _relogDistance.Change += RelogDistanceChange;
+                _playerManager.PlayerAdded += _playerManager_PlayerAdded;
+                _playerManager.PlayerRemoved += _playerManager_PlayerRemoved;
+                _playerManager.PlayerUpdated += _playerManager_PlayerUpdated;
+                _enemyListView.Click += _enemyListView_Click;
+                _friendlyListView.Click += _friendlyListView_Click;
+                _enemySounds.Change += _enemySounds_Change;
+                _friendlySounds.Change += _friendlySounds_Change;
+                _enemyIcon.Change += _enemyIcon_Change;
+                _friendlyIcon.Change += _friendlyIcon_Change;
+                view.Resize += _mainView_Resize;
+                _cleared = false;
             }
-            catch (Exception ex) { _logger.Error(ex); }
-        }
-
-        private void RegisterEvents()
-        {
-            _logger.Info("RegisterEvents()");
-            _debug.Change += DebugChange;
-            _logOnDeath.Change += LogOnDeathChange;
-            _logOnVitae.Change += LogOnVitaeChange;
-            _logOnRare.Change += LogOnRareChange;
-            _vitaeLimit.Change += VitaeLimitChange;
-            _relog.Change += RelogChange;
-            _blink.Change += BlinkChange;
-            _blinkMobs.Change += BlinkMobsChange;   
-            _blinkInterval.Change += BlinkIntervalChange;
-            _relogDuration.Change += RelogDurationChange;
-            _relogDistance.Change += RelogDistanceChange;
-            _playerManager.PlayerAdded += _playerManager_PlayerAdded;
-            _playerManager.PlayerRemoved += _playerManager_PlayerRemoved;
-            _playerManager.PlayerUpdated += _playerManager_PlayerUpdated;
-            _enemyListView.Click += _enemyListView_Click;
-            _friendlyListView.Click += _friendlyListView_Click;
-            _enemySounds.Change += _enemySounds_Change;
-            _friendlySounds.Change += _friendlySounds_Change;
-            _enemyIcon.Change += _enemyIcon_Change;
-            _friendlyIcon.Change += _friendlyIcon_Change;
-            view.Resize += _mainView_Resize;
+            catch (Exception ex)
+            {
+                _logger.Error(ex);
+            }
         }
 
         private void BlinkIntervalChange(object sender, EventArgs e)
@@ -225,6 +235,7 @@ namespace Commander.Lib.Views
             _friendlySounds.Change -= _enemySounds_Change;
             _friendlyIcon.Change -= _friendlyIcon_Change;
             _enemyIcon.Change -= _enemyIcon_Change;
+            _cleared = true;
         }
 
         private void _onPlayerChange()
@@ -350,7 +361,7 @@ namespace Commander.Lib.Views
                 foreach (DebuffInformation info in player.Debuffs)
                 {
                     int spell = info.Spell;
-                    if (info.MapDebuffToIcon(spell) != null && WorldObjectService.IsValidObject(player.Id))
+                    if (info.MapDebuffToIcon(spell) != null && _gameClient.IsValidObject(player.Id))
                     {
                         int icon = (int)info.MapDebuffToIcon(spell);
                         D3DObj obj = CoreManager.Current.D3DService.MarkObjectWithIcon(player.Id, icon);
@@ -418,13 +429,13 @@ namespace Commander.Lib.Views
 
                 if (col == 2)
                 {
-                    WorldObjectService.CastHeal(player.Id);
+                    _gameClient.CastHeal(player.Id);
                 }
 
                 if (col == 3)
                 {
 
-                    WorldObjectService.CastSpell(2082, player.Id);
+                    _gameClient.CastSpell(2082, player.Id);
                 }
 
             }
@@ -474,6 +485,7 @@ namespace Commander.Lib.Views
 
         private void _processPlayerAdd(Player player)
         {
+            _logger.Info("_processPlayerAdd()");
             bool enemy = player.Enemy;
             HudList playersView = enemy ? _enemyListView : _friendlyListView;
             int icon = enemy ? EnemyIcon : FriendlyIcon;
@@ -546,7 +558,7 @@ namespace Commander.Lib.Views
         {
             try
             {
-                if (Int32.TryParse(_vitaeLimit.Text, out int vitaeLimit) && vitaeLimit >= 5 && vitaeLimit <= 40)
+                if (Int32.TryParse(_vitaeLimit.Text, out int vitaeLimit) && vitaeLimit >= 1 && vitaeLimit <= 40)
                 {
                     _logger.WriteToChat($"MainView.VitaeLimitChange[EVENT]: {_vitaeLimit.Text}");
                     _settingsManager.Settings.VitaeLimit = vitaeLimit;
@@ -607,12 +619,22 @@ namespace Commander.Lib.Views
             catch (Exception ex) { _logger.Error(ex); }
         }
 
-        new public void Dispose()
+        private void _clear()
         {
-            base.Dispose();
+            if (_cleared)
+                return;
+
             UnRegisterEvents();
             _clearIcons();
             _clearDebuffObjects();
+        }
+
+        new public void Dispose()
+        {
+            base.Dispose();
+            _clear();
+            _globals.Core.CharacterFilter.LoginComplete -= CharacterFilter_LoginComplete;
+            _globals.Core.PluginTermComplete -= Core_PluginTermComplete;
         }
 
         private void _clearDebuffObjects()

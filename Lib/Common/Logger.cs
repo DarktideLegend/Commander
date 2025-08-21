@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Common
 {
     public interface Logger
     {

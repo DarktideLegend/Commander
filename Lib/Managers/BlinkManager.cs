@@ -4,19 +4,20 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Commander.Lib.Common;
 using Decal.Adapter.Wrappers;
 using Decal.Interop.Core;
 
 namespace Commander.Lib.Services
 {
-    public interface BlinkService: IDisposable
+    public interface BlinkManager: IDisposable
     {
         void BlinkObject(WorldObject blinkObject);
         void BlinkTheWorld();
         void Init();
     }
 
-    public class BlinkServiceImpl: BlinkService
+    public class BlinkManagerImpl: BlinkManager
     {
         private bool _disposed = false;
 
@@ -41,7 +42,7 @@ namespace Commander.Lib.Services
         private SettingsManager _settingsManager;
         private GlobalProvider _globals;
 
-        public BlinkServiceImpl(
+        public BlinkManagerImpl(
             Logger logger,
             SettingsManager settingsManager,
             GlobalProvider globals)
@@ -55,7 +56,7 @@ namespace Commander.Lib.Services
         {
             _globals.Core.CharacterFilter.LoginComplete += CharacterFilter_LoginComplete; 
             _globals.Core.CharacterFilter.Logoff += CharacterFilter_Logoff;
-            _logger.Info("BlinkService initialized.");
+            _logger.Info("BlinkManager initialized.");
         }
 
         public void BlinkObject(WorldObject blinkObject)
@@ -271,7 +272,7 @@ namespace Commander.Lib.Services
             {
                 if (disposing)
                 {
-                    _globals.Core.CharacterFilter.Login -= CharacterFilter_LoginComplete;
+                    _globals.Core.CharacterFilter.LoginComplete -= CharacterFilter_LoginComplete;
                     _globals.Core.CharacterFilter.Logoff -= CharacterFilter_Logoff;
                     _globals.Core.RenderFrame -= Core_RenderFrame;
                 }

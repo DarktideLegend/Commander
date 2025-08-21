@@ -1,4 +1,5 @@
-﻿using Commander.Lib.Services;
+﻿using Commander.Lib.Common;
+using Commander.Lib.Services;
 using System;
 using System.Drawing;
 using System.IO;
@@ -117,7 +118,7 @@ namespace Commander.Lib.Views
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue = false; 
 
         protected virtual void Dispose(bool disposing)
         {

@@ -1,4 +1,5 @@
-﻿using Commander.Lib.Models;
+﻿using Commander.Lib.Common;
+using Commander.Lib.Models;
 using Commander.Models;
 using Decal.Adapter.Wrappers;
 using System;
@@ -11,19 +12,16 @@ using System.Timers;
 
 namespace Commander.Lib.Services
 {
-    public interface PlayerManager
+    public interface PlayerManager : IDisposable
     {
-        void Add(Player player);
         void Remove(int id, Player player);
         void Update(int id, Player player);
-        void CachePlayer(int id);
         List<int> GetCache();
         Player Get(int id);
         Player GetByName(string name);
-        void Clear();
-        void ClearCache();
-        bool IsEnemy(int id);
         Dictionary<int, Player> PlayersInstance();
+        void Init();
+
         event EventHandler<Player> PlayerAdded;
         event EventHandler<Player> PlayerRemoved;
         event EventHandler<Player> PlayerUpdated;
@@ -34,12 +32,16 @@ namespace Commander.Lib.Services
         private Logger _logger;
         private LoginSessionManager _loginSessionManager;
         private SettingsManager _settingsManager;
+        private GameClient _gameClient;
+        private GlobalProvider _globals;
+        private Player.Factory _playerFactory;
         private List<int> _preSessionPlayerCache = new List<int>();
         private Dictionary<int, Player> _players = new Dictionary<int, Player>();
         public Dictionary<int, Player> Enemies = new Dictionary<int, Player>();
         public Dictionary<int, Player> Friends = new Dictionary<int, Player>();
         private Timer _ghostObjectTimer;
         private bool isPlayingSound = false;
+        private bool _disposed;
 
         public event EventHandler<Player> PlayerAdded;
         public event EventHandler<Player> PlayerRemoved;
@@ -47,13 +49,156 @@ namespace Commander.Lib.Services
 
         public PlayerManagerImpl(
             Logger logger,
+            GameClient gameClient,
             SettingsManager settingsManager,
+            GlobalProvider globals,
+            Player.Factory playerFactory,
             LoginSessionManager loginSessionManager)
         {
             _logger = logger.Scope("PlayerManager");
+            _gameClient = gameClient;
             _loginSessionManager = loginSessionManager;
             _settingsManager = settingsManager;
+            _globals = globals;
+            _playerFactory = playerFactory;
             _ghostObjectTimerInit();
+        }
+
+        public void Init()
+        {
+            _logger.Info("PlayerManager Initialized");
+            _globals.Core.CharacterFilter.LoginComplete += CharacterFilter_LoginComplete;
+            _globals.Core.WorldFilter.CreateObject += WorldFilter_CreateObject;
+            _globals.Core.WorldFilter.MoveObject += WorldFilter_MoveObject;
+            _globals.Core.WorldFilter.ReleaseObject += WorldFilter_ReleaseObject;
+            _globals.Core.PluginTermComplete += Core_PluginTermComplete;
+        }
+
+        private void Core_PluginTermComplete(object sender, EventArgs e)
+        {
+            _logger.Info($"Core_PluginTermComplete()");
+            _clear();
+        }
+
+        private void WorldFilter_ReleaseObject(object sender, ReleaseObjectEventArgs e)
+        {
+            try
+            {
+                int id = e.Released.Id;
+                string name = e.Released.Name;
+                Player player = Get(id);
+
+                if (player != null) 
+                {
+                    _logger.Info($"Enemy Released: {name}");
+                    Remove(id, player);
+                }
+            } catch (Exception ex) { _logger.Error(ex); }
+        }
+
+        private void WorldFilter_MoveObject(object sender, MoveObjectEventArgs e)
+        {
+            try
+            {
+                _processWorldObject(e.Moved);
+            } catch (Exception ex) { _logger.Error(ex); }
+        }
+
+        private void WorldFilter_CreateObject(object sender, CreateObjectEventArgs e)
+        {
+            try
+            {
+                _processWorldObject(e.New);
+            } catch (Exception ex) { _logger.Error(ex); }
+        }
+
+        private void CharacterFilter_LoginComplete(object sender, EventArgs e)
+        {
+            LoginSession session = _loginSessionManager.Session;
+            foreach (int id in GetCache())
+            {
+                if (!_gameClient.IsValidObject(id))
+                    return;
+
+                WorldObject wo = _gameClient.GetWorldObject(id);
+                int woMonarch = wo.Values(LongValueKey.Monarch);
+
+                bool enemy = _isEnemy(id);
+                bool self = session.Id == id;
+                if (!self)
+                {
+                    _addPlayer(_playerFactory(wo, enemy));
+                }
+            }
+
+            _preSessionPlayerCache.Clear();
+        }
+
+        private void _processWorldObject(WorldObject obj)
+        {
+            LoginSession session = _loginSessionManager.Session;
+            Settings settings = _settingsManager.Settings;
+
+            if (session == null || settings == null)
+            {
+                _processPreSession(obj);
+            }
+            else
+            {
+                _processPostSession(obj);
+            }
+        }
+        private void _processPostSession(WorldObject wo)
+        {
+            if (_gameClient.GetSelf().Id != _loginSessionManager.Session.Id)
+            {
+                _loginSessionManager.Clear();
+                _processPreSession(wo);
+                return;
+            }
+
+            if (_gameClient.IsPlayer(wo.Id))
+            {
+                _processPlayerObject(wo);
+            }
+        }
+        private void _processPlayerObject(WorldObject wo)
+        {
+            int currentId = _gameClient.GetSelf().Id;
+            var enemy = _isEnemy(wo.Id);
+            bool self = wo.Id == currentId;
+
+            if (self)
+                return;
+
+            if (Get(wo.Id) != null)
+            {
+                //WorldObjectService.RequestId(woId);
+                return;
+            }
+
+            double distance = _gameClient.GetDistanceFromPlayer(wo.Id, currentId);
+            int playerDistance = Convert.ToInt32(distance);
+
+            if (playerDistance > _settingsManager.Settings.RelogDistance)
+                return;
+
+            if (enemy)
+            {
+                _addPlayer(_playerFactory(wo, true));
+                return;
+            }
+
+            _addPlayer(_playerFactory(wo, false));
+        }
+
+        private void _processPreSession(WorldObject obj)
+        {
+            if (_gameClient.IsPlayer(obj.Id))
+            {
+                _cachePlayer(obj.Id);
+                return;
+            }
         }
 
         private void _ghostObjectTimerInit()
@@ -64,7 +209,7 @@ namespace Commander.Lib.Services
             _ghostObjectTimer.Elapsed += _ghostObjectTimer_Elapsed;
         }
 
-        public void CachePlayer(int id)
+        private void _cachePlayer(int id)
         {
             if (!_preSessionPlayerCache.Contains(id))
                 _preSessionPlayerCache.Add(id);
@@ -75,10 +220,10 @@ namespace Commander.Lib.Services
             return _preSessionPlayerCache;
         }
 
-        public bool IsEnemy(int otherId)
+        private bool _isEnemy(int otherId)
         {
-            int currentId = WorldObjectService.GetSelf().Id;
-            WorldObject wo = WorldObjectService.GetWorldObject(otherId);
+            int currentId = _gameClient.GetSelf().Id;
+            WorldObject wo = _gameClient.GetWorldObject(otherId);
             Settings settings = _settingsManager.Settings;
             LoginSession session = _loginSessionManager.Session;
 
@@ -105,7 +250,7 @@ namespace Commander.Lib.Services
 
         private void _processGhostObjects()
         {
-            int currentId = WorldObjectService.GetSelf().Id;
+            int currentId = _gameClient.GetSelf().Id;
 
             if (_players.Count == 0)
             {
@@ -116,8 +261,8 @@ namespace Commander.Lib.Services
             {
                 int playerId = player.Value.Id;
                 if (
-                    !WorldObjectService.IsValidObject(playerId) ||
-                    WorldObjectService.GetDistanceFromPlayer(currentId, playerId) > 1000)
+                    !_gameClient.IsValidObject(playerId) ||
+                    _gameClient.GetDistanceFromPlayer(currentId, playerId) > 1000)
                 {
                     _logger.Info($"Player: {player.Value.Name} is not a valid object");
                     Remove(playerId, Get(playerId));
@@ -160,7 +305,7 @@ namespace Commander.Lib.Services
 
             if (currentPlayer == null)
             {
-                Add(player);
+                _addPlayer(player);
                 return;
             }
 
@@ -180,18 +325,12 @@ namespace Commander.Lib.Services
             _logger.WriteToChat($"Player Removed: {player.Name}");
         }
 
-        public void Clear()
-        {
-            _logger.Info("Clear()");
-            _players.Clear();
-            ClearCache();
-            _ghostObjectTimer.Stop();
-        }
-
-        public void Add(Player player)
+        private void _addPlayer(Player player)
         {
             LoginSession session = _loginSessionManager.Session;
             Settings settings = _settingsManager.Settings;
+            var relog = settings.Relog;
+            var isRelogging = _globals.Relogging;
             string soundPath;
 
             if (Get(player.Id) != null)
@@ -208,7 +347,7 @@ namespace Commander.Lib.Services
             if (session == null)
                 return;
 
-            WorldObjectService.RequestId(player.Id);
+            _gameClient.RequestId(player.Id);
             if (player.Enemy)
             {
                 _logger.WriteToChat($"Enemy Added: {player.Name}");
@@ -281,9 +420,36 @@ namespace Commander.Lib.Services
             isPlayingSound = false;
         }
 
-        public void ClearCache()
+        public void _clear()
         {
+            _logger.Info("Clearing PlayerManager");
+            _players.Clear();
+            Enemies.Clear();
+            Friends.Clear();
             _preSessionPlayerCache.Clear();
+            _ghostObjectTimer.Stop();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _globals.Core.CharacterFilter.LoginComplete -= CharacterFilter_LoginComplete;
+                    _globals.Core.WorldFilter.CreateObject -= WorldFilter_CreateObject;
+                    _globals.Core.WorldFilter.MoveObject -= WorldFilter_MoveObject;
+                    _globals.Core.WorldFilter.ReleaseObject -= WorldFilter_ReleaseObject;
+                    _globals.Core.PluginTermComplete -= Core_PluginTermComplete;
+                    _clear();
+                }
+                _disposed = true;
+            }
         }
     }
 }

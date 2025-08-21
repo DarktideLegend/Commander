@@ -2,10 +2,11 @@
 using Newtonsoft.Json;
 using Commander.Models;
 using System;
+using Commander.Lib.Common;
 
 namespace Commander.Lib.Services
 {
-    public interface SettingsManager
+    public interface SettingsManager : IDisposable
     {
         Settings ReadUserSettings();
         GlobalSettings ReadGlobalSettings();
@@ -36,6 +37,7 @@ namespace Commander.Lib.Services
         private string _server;
         private string _name;
         private string _account;
+        private bool _disposed = false;
 
         public SettingsManagerImpl(
             Logger logger,
@@ -54,8 +56,8 @@ namespace Commander.Lib.Services
 
         public void Init()
         {
-            _logger.Info("Init()");
             _globals.Core.CharacterFilter.LoginComplete += CharacterFilter_LoginComplete;
+            _logger.Info("SettingsManager initialized.");
         }
 
         private void CharacterFilter_LoginComplete(object sender, EventArgs e)
@@ -175,6 +177,22 @@ namespace Commander.Lib.Services
                 Settings.UIWidth = width;
                 Settings.UIHeight = height;
                 WriteUserSettings();
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _globals.Core.CharacterFilter.LoginComplete -= CharacterFilter_LoginComplete;
+                }
+                _disposed = true;
+            }
         }
 
     }

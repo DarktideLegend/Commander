@@ -3,7 +3,7 @@ using System.Reflection;
 using Decal.Adapter;
 using Decal.Adapter.Wrappers;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Common
 {
     public class GlobalProvider
     {
@@ -11,6 +11,7 @@ namespace Commander.Lib.Services
         public string PluginPath;
         public string Version;
         public bool Relogging = false;
+        public bool IsLoggingOnDeath = false;
         public NetServiceHost Host;
         public CoreManager Core;
 

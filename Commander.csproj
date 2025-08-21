@@ -15,8 +15,8 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-	</PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -59,36 +59,29 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Lib\Controllers\Bindings\ControllersModule.cs" />
-    <Compile Include="Lib\Controllers\ServerDispatchController.cs" />
-    <Compile Include="Lib\Controllers\ReleaseObjectController.cs" />
-    <Compile Include="Lib\Controllers\ObjectControllerBase.cs" />
-    <Compile Include="Lib\Controllers\DeathController.cs" />
-    <Compile Include="Lib\Controllers\LoginCompleteController.cs" />
-    <Compile Include="Lib\Controllers\CreateObjectController.cs" />
-    <Compile Include="Lib\Controllers\MoveObjectController.cs" />
-    <Compile Include="Lib\Controllers\PluginTermCompleteController.cs" />
-    <Compile Include="Lib\Controllers\LoginController.cs" />
+    <Compile Include="Lib\Common\Bindings\CommonModule.cs" />
     <Compile Include="Lib\Models\Bindings\ModelsModule.cs" />
     <Compile Include="Lib\Models\Debuff.cs" />
     <Compile Include="Lib\Models\Player.cs" />
     <Compile Include="Lib\Models\LoginSession.cs" />
     <Compile Include="Lib\Models\Settings.cs" />
     <Compile Include="FilterCore.cs" />
-    <Compile Include="Lib\Services\Bindings\ServicesModule.cs" />
-    <Compile Include="Lib\Services\BlinkService.cs" />
-    <Compile Include="Lib\Services\DebuffManager.cs" />
-    <Compile Include="Lib\Services\DeathManager.cs" />
-    <Compile Include="Lib\Services\PlayerManager.cs" />
-    <Compile Include="Lib\Services\RelogManager.cs" />
-    <Compile Include="Lib\Services\WorldObjectService.cs" />
+    <Compile Include="Lib\Managers\Bindings\ManagersModule.cs" />
+    <Compile Include="Lib\Managers\BlinkManager.cs" />
+    <Compile Include="Lib\Managers\DebuffManager.cs" />
+    <Compile Include="Lib\Managers\DeathManager.cs" />
+    <Compile Include="Lib\Managers\PlayerManager.cs" />
+    <Compile Include="Lib\Managers\RareManager.cs" />
+    <Compile Include="Lib\Managers\RelogManager.cs" />
+    <Compile Include="Lib\Managers\VitaeManager.cs" />
+    <Compile Include="Lib\Common\GameClient.cs" />
     <Compile Include="Lib\Views\Bindings\ViewsModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Lib\Services\LoginSessionManager.cs" />
-    <Compile Include="Lib\Services\SettingsManager.cs" />
-    <Compile Include="Lib\Services\Debugger.cs" />
-    <Compile Include="Lib\Services\GlobalProvider.cs" />
-    <Compile Include="Lib\Services\Logger.cs" />
+    <Compile Include="Lib\Managers\LoginSessionManager.cs" />
+    <Compile Include="Lib\Managers\SettingsManager.cs" />
+    <Compile Include="Lib\Managers\DebugManager.cs" />
+    <Compile Include="Lib\Common\GlobalProvider.cs" />
+    <Compile Include="Lib\Common\Logger.cs" />
     <Compile Include="Lib\Views\Common\BaseView.cs" />
     <Compile Include="Lib\Views\MainView\MainView.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
