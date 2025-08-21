@@ -9,6 +9,9 @@ namespace Commander.Models
         public bool LogOnVitae = true;
         public bool LogOnRare = true;
         public bool Relog = false;
+        public bool Blink = false;
+        public bool BlinkMobs = false;
+        public int BlinkInterval = 5000;
         public bool EnemySounds = true;
         public bool FriendlySounds = true;
         public int RelogDuration = 5;

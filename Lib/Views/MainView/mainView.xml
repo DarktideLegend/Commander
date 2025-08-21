@@ -36,7 +36,11 @@
 					<control progid="DecalControls.CheckBox" name="FriendlySounds" left="10" top="190" width="100" height="20" text="Friendly Sounds" checked="true" />
 					<control progid="DecalControls.CheckBox" name="EnemyIcon" left="10" top="220" width="100" height="20" text="Enemy Icon" checked="true" />
 					<control progid="DecalControls.CheckBox" name="FriendlyIcon" left="10" top="250" width="100" height="20" text="Friendly Icon" checked="true" />
-				</control>
+					<control progid="DecalControls.CheckBox" name="Blink" left="10" top="280" width="100" height="20" text="Blink" checked="true" />
+					<control progid="DecalControls.StaticText" name="BlinkIntervalLabel" left="65" top="280" width="150" height="20" text="interval:"/>
+					<control progid="DecalControls.Edit" name="BlinkInterval" left="115" top="279" width="50" height="20" text="1" />
+					<control progid="DecalControls.CheckBox" name="BlinkMobs" left="10" top="310" width="100" height="20" text="BlinkMobs" checked="true" />
+				</control>			
 			</page>
 		</control>
 	</control>

@@ -29,7 +29,10 @@ namespace Commander.Lib.Views
         private HudCheckBox _friendlyIcon;
         private HudCheckBox _enemyIcon;
         private HudCheckBox _relog;
+        private HudCheckBox _blink;
+        private HudCheckBox _blinkMobs;
         private HudTextBox _vitaeLimit;
+        private HudTextBox _blinkInterval;
         private HudTextBox _relogDuration;
         private HudTextBox _relogDistance;
         private HudList _enemyListView;
@@ -83,7 +86,10 @@ namespace Commander.Lib.Views
                 _logOnRare = (HudCheckBox)view["LogOnRare"];
                 _vitaeLimit = (HudTextBox)view["VitaeLimit"];
                 _relog = (HudCheckBox)view["Relog"];
+                _blink = (HudCheckBox)view["Blink"];
+                _blinkMobs = (HudCheckBox)view["BlinkMobs"];
                 _relogDuration = (HudTextBox)view["RelogDuration"];
+                _blinkInterval = (HudTextBox)view["BlinkInterval"];
                 _relogDistance = (HudTextBox)view["RelogDistance"];
                 _enemyListView = (HudList)view["EnemyList"];
                 _friendlyListView = (HudList)view["FriendlyList"];
@@ -100,6 +106,9 @@ namespace Commander.Lib.Views
                 _logOnDeath.Checked = _settings.LogOnDeath;
                 _logOnVitae.Checked = _settings.LogOnVitae;
                 _logOnRare.Checked = _settings.LogOnRare;
+                _blink.Checked = _settings.Blink;
+                _blinkMobs.Checked = _settings.BlinkMobs;
+                _blinkInterval.Text = _settings.BlinkInterval.ToString();
 
                 _vitaeLimit.Text = _settings.VitaeLimit.ToString();
                 _relog.Checked = _settings.Relog;
@@ -135,6 +144,9 @@ namespace Commander.Lib.Views
             _logOnRare.Change += LogOnRareChange;
             _vitaeLimit.Change += VitaeLimitChange;
             _relog.Change += RelogChange;
+            _blink.Change += BlinkChange;
+            _blinkMobs.Change += BlinkMobsChange;   
+            _blinkInterval.Change += BlinkIntervalChange;
             _relogDuration.Change += RelogDurationChange;
             _relogDistance.Change += RelogDistanceChange;
             _playerManager.PlayerAdded += _playerManager_PlayerAdded;
@@ -149,6 +161,46 @@ namespace Commander.Lib.Views
             view.Resize += _mainView_Resize;
         }
 
+        private void BlinkIntervalChange(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Int32.TryParse(_blinkInterval.Text, out int blinkInterval))
+                {
+                    _logger.WriteToChat($"MainView.BlinkIntervalChange[EVENT]: {_blinkInterval.Text}");
+                    _settingsManager.Settings.BlinkInterval = blinkInterval;
+                    _settingsManager.WriteUserSettings();
+                }
+
+            }
+            catch (Exception ex) { _logger.Error(ex); }
+        }
+
+        private void BlinkMobsChange(object sender, EventArgs e)
+        {
+            try
+            {
+                _logger.WriteToChat($"MainView.BlinkMobsChange[EVENT]: {_blinkMobs.Checked}");
+
+                _settingsManager.Settings.BlinkMobs = _blinkMobs.Checked;
+                _settingsManager.WriteUserSettings();
+
+            }
+            catch (Exception ex) { _logger.Error(ex); }
+        }
+
+        private void BlinkChange(object sender, EventArgs e)
+        {
+            try
+            {
+                _logger.WriteToChat($"MainView.BlinkChange[EVENT]: {_blink.Checked}");
+
+                _settingsManager.Settings.Blink = _blink.Checked;
+                _settingsManager.WriteUserSettings();
+
+            }
+            catch (Exception ex) { _logger.Error(ex); }
+        }
 
         private void UnRegisterEvents()
         {
@@ -157,6 +209,9 @@ namespace Commander.Lib.Views
             _logOnDeath.Change -= LogOnDeathChange;
             _logOnVitae.Change -= LogOnVitaeChange;
             _logOnRare.Change -= LogOnRareChange;
+            _blink.Change -= BlinkChange;
+            _blinkMobs.Change -= BlinkMobsChange;
+            _blinkInterval.Change -= BlinkIntervalChange;
             _vitaeLimit.Change -= VitaeLimitChange;
             _relog.Change -= RelogChange;
             _relogDuration.Change -= RelogDurationChange;

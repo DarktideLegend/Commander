@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Reflection;
 using Autofac;
@@ -19,6 +20,7 @@ namespace Commander
         private IContainer _container;
         private Logger _logger;
         private Debugger _debugger;
+        private BlinkService _blink;
         private static Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
         private static string[] EmbeddedLibraries =
            ExecutingAssembly.GetManifestResourceNames().Where(x => x.EndsWith(".dll")).ToArray();
@@ -58,6 +60,7 @@ namespace Commander
             _container = builder.Build();
 
             _logger = _container.Resolve<Logger>().Scope("App");
+            _blink = _container.Resolve<BlinkService>();
             _debugger = _container.Resolve<Debugger>();
             _debugger.Start();
         }
@@ -102,6 +105,7 @@ namespace Commander
                 Core.WorldFilter.MoveObject += _container.Resolve<MoveObjectController>().Init;
                 Core.WorldFilter.ReleaseObject += _container.Resolve<ReleaseObjectController>().Init;
                 Core.EchoFilter.ServerDispatch += _container.Resolve<ServerDispatchController>().Init;
+                _blink.Init();
             } catch (Exception ex) { _logger.Error(ex); }
         }
     }
