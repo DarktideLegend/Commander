@@ -140,17 +140,21 @@ namespace Commander.Lib.Controllers
 
             if (obj != null)
             {
-                var wcid = obj.Values(LongValueKey.Type);
-                var rareId = obj.Values(LongValueKey.RareId);
-
-                if (tier4Rares.Contains(wcid) || tier5Rares.Contains(wcid) || tier6Rares.Contains(wcid))
+                var logOnRare = _settingsManager.Settings.LogOnRare;
+                if (logOnRare)
                 {
-                    var message = $"You have found the rare item {obj.Name}!";
-                    _logger.Info("_processPutItemInContainer Rare Item Found");
-                    _logger.WriteToChat(message);
-                    _logger.WriteToWindow(message);
-                    WorldObjectService.Logout();
-                    return;
+                    var wcid = obj.Values(LongValueKey.Type);
+                    var rareId = obj.Values(LongValueKey.RareId);
+
+                    if (tier4Rares.Contains(wcid) || tier5Rares.Contains(wcid) || tier6Rares.Contains(wcid))
+                    {
+                        var message = $"You have found the rare item {obj.Name}!";
+                        _logger.Info("_processPutItemInContainer Rare Item Found");
+                        _logger.WriteToChat(message);
+                        _logger.WriteToWindow(message);
+                        WorldObjectService.Logout();
+                        return;
+                    }
                 }
             }
         }

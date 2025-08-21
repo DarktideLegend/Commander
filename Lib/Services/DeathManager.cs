@@ -91,9 +91,10 @@ namespace Commander.Lib.Services
             if (relogging)
             {
                 _relogManager.Stop();
-                _settingsManager.Settings.Relog = false;
-                _settingsManager.WriteUserSettings();
             }
+
+            _settingsManager.Settings.Relog = false;
+            _settingsManager.WriteUserSettings();
 
             _logger.Info("_processLogOnDeath()");
             _logger.WriteToChat(deathMessage);

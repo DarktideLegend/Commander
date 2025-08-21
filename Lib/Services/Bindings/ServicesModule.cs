@@ -15,6 +15,7 @@ namespace Commander.Lib.Services.Bindings
             builder.RegisterType<GlobalProvider>().SingleInstance();
             builder.RegisterType<DeathManagerImpl>().As<DeathManager>().SingleInstance();
             builder.RegisterType<LoggerImpl>().As<Logger>();
+            builder.RegisterType<BlinkServiceImpl>().As<BlinkService>().SingleInstance();
         }
     }
 }
