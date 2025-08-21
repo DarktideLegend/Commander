@@ -15,7 +15,7 @@ namespace Commander.Lib.Services
         Settings Settings { get; set; }
         GlobalSettings GlobalSettings { get; set; }
 
-        void Init(string server, string account, string name);
+        void Init();
     }
 
     public class SettingsManagerImpl : SettingsManager
@@ -23,7 +23,9 @@ namespace Commander.Lib.Services
         public Settings Settings { get; set; }
         public GlobalSettings GlobalSettings { get; set; }
         private Logger _logger;
+        private GlobalProvider _globals;
         private Settings.Factory _settingsFactory;
+        private LoginSessionManager _loginSessionManager;
         private GlobalSettings.Factory _globalSettingsFactory;
         private string _pluginPath;
         private string _serverPath;
@@ -36,22 +38,32 @@ namespace Commander.Lib.Services
         private string _account;
 
         public SettingsManagerImpl(
-            Logger logger, 
+            Logger logger,
+            LoginSessionManager loginSessionManager,
             GlobalProvider globals)
 
         {
             _logger = logger.Scope("SettingsManager");
             _settingsFactory = Settings.CreateDefaultSettings;
             _globalSettingsFactory = GlobalSettings.CreateDefaultSettings;
+            _globals = globals;
+            _loginSessionManager = loginSessionManager;
             _pluginPath = globals.PluginPath;
             _pluginName = globals.PluginName;
         }
 
-        public void Init(string server, string account, string name)
+        public void Init()
         {
-            _server = server;
-            _name = name;
-            _account = account;
+            _logger.Info("Init()");
+            _globals.Core.CharacterFilter.LoginComplete += CharacterFilter_LoginComplete;
+        }
+
+        private void CharacterFilter_LoginComplete(object sender, EventArgs e)
+        {
+            var session = _loginSessionManager.Session;
+            _server = session.Server;
+            _name = session.Name;
+            _account = session.AccountName;
             _serverPath = $@"{_pluginPath}\{_server}";
             _characterPath = $@"{_pluginPath}\{_server}\{_account}\{_name}";
             _serverFilePath = $@"{_serverPath}\globals.json";

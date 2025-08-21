@@ -6,7 +6,7 @@ namespace Commander.Lib.Services
 {
     public interface LoginSessionManager
     {
-        LoginSession Init();
+        void Init();
         LoginSession Session { get; }
         void Clear();
     }
@@ -15,13 +15,16 @@ namespace Commander.Lib.Services
     {
         private readonly LoginSession.Factory _loginSessionFactory;
         private Logger _logger;
+        private GlobalProvider _globals;
         public LoginSession Session { get; private set; }
 
         public LoginSessionManagerImpl(
             Logger logger,
+            GlobalProvider globals,
             LoginSession.Factory loginSessionFactory)
         {
             _logger = logger.Scope("LoginSessionManager");
+            _globals = globals;
             _loginSessionFactory = loginSessionFactory;
         }
 
@@ -30,10 +33,14 @@ namespace Commander.Lib.Services
             Session = null;
         }
 
-        public LoginSession Init()
+        public void Init()
         {
             _logger.Info("Init()");
+            _globals.Core.CharacterFilter.LoginComplete += CharacterFilter_LoginComplete; 
+        }
 
+        private void CharacterFilter_LoginComplete(object sender, EventArgs e)
+        {
             int monarchId;
             string monarchName;
 
@@ -72,8 +79,6 @@ namespace Commander.Lib.Services
             _logger.Info($@"Vitae: {Session.Vitae.ToString()}");
             _logger.Info($@"Health: {Session.Health.ToString()}");
             _logger.Info($@"ServerPopulation: {Session.ServerPopulation.ToString()}");
-
-            return Session;
         }
     }
 }

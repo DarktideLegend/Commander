@@ -72,11 +72,10 @@ namespace Commander.Lib.Controllers
             {
                 _logger.Info("Init()");
 
-                LoginSession session = _loginSessionManager.Init();
+                LoginSession session = _loginSessionManager.Session;
                 string server = session.Server;
                 string account = session.AccountName;
                 string name = session.Name;
-                _settingsManager.Init(server, account, name);
                 _logger.WriteToWindow($"{server}-{account}-{name}");
 
                 _handleDebugger();

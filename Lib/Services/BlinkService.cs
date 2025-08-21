@@ -9,7 +9,7 @@ using Decal.Interop.Core;
 
 namespace Commander.Lib.Services
 {
-    public interface BlinkService
+    public interface BlinkService: IDisposable
     {
         void BlinkObject(WorldObject blinkObject);
         void BlinkTheWorld();
@@ -53,12 +53,10 @@ namespace Commander.Lib.Services
 
         public void Init()
         {
-            _globals.Core.CharacterFilter.Login += CharacterFilter_Login;
+            _globals.Core.CharacterFilter.LoginComplete += CharacterFilter_LoginComplete; 
             _globals.Core.CharacterFilter.Logoff += CharacterFilter_Logoff;
-            _globals.Core.RenderFrame += Core_RenderFrame;
             _logger.Info("BlinkService initialized.");
         }
-
 
         public void BlinkObject(WorldObject blinkObject)
         {
@@ -218,7 +216,6 @@ namespace Commander.Lib.Services
         {
             try
             {
-
                 var blinkInterval = _settingsManager.Settings.BlinkInterval;
                 long currentTime = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
                 if (currentTime - lastBlinkTime >= blinkInterval)
@@ -229,18 +226,18 @@ namespace Commander.Lib.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                _logger.Warn(ex.Message);
+                _logger.Warn(ex.StackTrace);
             }
 
         }
 
-        private void CharacterFilter_Login(object sender, LoginEventArgs e)
+        private void CharacterFilter_LoginComplete(object sender, EventArgs e)
         {
             try
             {
-                var blinkInterval = _settingsManager.Settings.BlinkInterval;
-                lastBlinkTime = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
-                _logger.Info($"Custom blink timer started with a duration of {blinkInterval / 1000} seconds");
+                _logger.Info("CharacterFilter_LoginComplete()");
+                _globals.Core.RenderFrame += Core_RenderFrame;
             }
             catch (Exception ex)
             {
@@ -253,7 +250,9 @@ namespace Commander.Lib.Services
         {
             try
             {
+                _logger.Info("CharacterFilter_Logoff()");
                 lastBlinkTime = 0;
+                _globals.Core.RenderFrame -= Core_RenderFrame;
             }
             catch (Exception ex)
             {
@@ -272,7 +271,7 @@ namespace Commander.Lib.Services
             {
                 if (disposing)
                 {
-                    _globals.Core.CharacterFilter.Login -= CharacterFilter_Login;
+                    _globals.Core.CharacterFilter.Login -= CharacterFilter_LoginComplete;
                     _globals.Core.CharacterFilter.Logoff -= CharacterFilter_Logoff;
                     _globals.Core.RenderFrame -= Core_RenderFrame;
                 }
