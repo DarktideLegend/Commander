@@ -21,6 +21,8 @@ namespace Commander
         private Logger _logger;
         private Debugger _debugger;
         private BlinkService _blink;
+        private LoginSessionManager _loginSessionManager;
+        private SettingsManager _settingsManager;
         private static Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
         private static string[] EmbeddedLibraries =
            ExecutingAssembly.GetManifestResourceNames().Where(x => x.EndsWith(".dll")).ToArray();
@@ -61,6 +63,8 @@ namespace Commander
 
             _logger = _container.Resolve<Logger>().Scope("App");
             _blink = _container.Resolve<BlinkService>();
+            _loginSessionManager = _container.Resolve<LoginSessionManager>();
+            _settingsManager = _container.Resolve<SettingsManager>();   
             _debugger = _container.Resolve<Debugger>();
             _debugger.Start();
         }
@@ -90,6 +94,7 @@ namespace Commander
                 Core.PluginTermComplete -= _container.Resolve<PluginTermCompleteController>().Init;
                 Core.EchoFilter.ServerDispatch -= _container.Resolve<ServerDispatchController>().Init;
                 Core.FilterInitComplete -= FilterInitComplete;
+                _blink.Dispose();
             } catch (Exception ex) { _logger.Error(ex); }
         }
 
@@ -98,6 +103,9 @@ namespace Commander
             try
             {
                 _logger.Info("FilterInitComplete()");
+                _loginSessionManager.Init();
+                _settingsManager.Init();
+                _blink.Init();
                 Core.CharacterFilter.Login += _container.Resolve<LoginController>().Init;
                 Core.CharacterFilter.LoginComplete += _container.Resolve<LoginCompleteController>().Init;
                 Core.CharacterFilter.Death += _container.Resolve<DeathController>().Init;
@@ -105,7 +113,6 @@ namespace Commander
                 Core.WorldFilter.MoveObject += _container.Resolve<MoveObjectController>().Init;
                 Core.WorldFilter.ReleaseObject += _container.Resolve<ReleaseObjectController>().Init;
                 Core.EchoFilter.ServerDispatch += _container.Resolve<ServerDispatchController>().Init;
-                _blink.Init();
             } catch (Exception ex) { _logger.Error(ex); }
         }
     }
