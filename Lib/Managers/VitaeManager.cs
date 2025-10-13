@@ -7,7 +7,7 @@ using System.Timers;
 using Commander.Lib.Common;
 using Commander.Models;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface VitaeManager : IDisposable
     {

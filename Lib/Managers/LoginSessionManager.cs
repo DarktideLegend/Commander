@@ -3,7 +3,7 @@ using Commander.Models;
 using Decal.Adapter;
 using System;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface LoginSessionManager : IDisposable
     {

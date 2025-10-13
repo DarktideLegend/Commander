@@ -7,7 +7,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Timers;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface RelogManager : IDisposable
     {

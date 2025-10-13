@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface DeathManager : IDisposable
     {

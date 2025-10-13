@@ -7,7 +7,7 @@ using Commander.Lib.Common;
 using Decal.Adapter;
 using Decal.Adapter.Wrappers;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface RareManager : IDisposable
     {

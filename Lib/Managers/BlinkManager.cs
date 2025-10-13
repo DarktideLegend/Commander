@@ -8,7 +8,7 @@ using Commander.Lib.Common;
 using Decal.Adapter.Wrappers;
 using Decal.Interop.Core;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface BlinkManager: IDisposable
     {

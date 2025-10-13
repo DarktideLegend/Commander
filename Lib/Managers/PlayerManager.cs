@@ -10,7 +10,7 @@ using System.Media;
 using System.Reflection;
 using System.Timers;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface PlayerManager : IDisposable
     {

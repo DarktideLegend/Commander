@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Timers;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface DebuffManager: IDisposable
     {

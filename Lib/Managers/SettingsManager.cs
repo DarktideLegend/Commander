@@ -4,7 +4,7 @@ using Commander.Models;
 using System;
 using Commander.Lib.Common;
 
-namespace Commander.Lib.Services
+namespace Commander.Lib.Managers
 {
     public interface SettingsManager : IDisposable
     {

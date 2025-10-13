@@ -1,6 +1,6 @@
 ﻿using Autofac;
 
-namespace Commander.Lib.Services.Bindings
+namespace Commander.Lib.Managers.Bindings
 {
     public class ManagersModule : Module
     {
