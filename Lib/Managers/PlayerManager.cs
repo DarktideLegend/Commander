@@ -351,6 +351,7 @@ namespace Commander.Lib.Managers
             if (player.Enemy)
             {
                 _logger.WriteToChat($"Enemy Added: {player.Name}");
+                _logger.Think("Enemy Added: " + player.Name, _globals.Core.CharacterFilter.Name);
                 soundPath = "Commander.Assets.Audio.enemy.wav";
                 if (settings.EnemySounds)
                 {

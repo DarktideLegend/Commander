@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Decal.Adapter;
 
 namespace Commander.Lib.Common
 {
@@ -10,6 +11,7 @@ namespace Commander.Lib.Common
         void Error(Exception ex);
         void Warn(string message);
         void WriteToChat(string message);
+        void Think(string message, string name);
         void WriteToWindow(string message);
         Logger Scope(string scope);
     }
@@ -19,15 +21,56 @@ namespace Commander.Lib.Common
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern bool SetWindowText(IntPtr hwnd, string lpString);
 
+        [DllImport("Decal.dll")]
+        private static extern int DispatchOnChatCommand(ref IntPtr str, [MarshalAs(UnmanagedType.U4)] int target);
+
+
+
         private GlobalProvider _globals;
         private string _scope;
         private Logger _instance;
+
+        private static bool Decal_DispatchOnChatCommand(string cmd)
+        {
+            IntPtr bstr = Marshal.StringToBSTR(cmd);
+
+            try
+            {
+                bool eaten = (DispatchOnChatCommand(ref bstr, 1) & 0x1) > 0;
+
+                return eaten;
+            }
+            finally
+            {
+                Marshal.FreeBSTR(bstr);
+            }
+        }
+
+        /// <summary>
+        /// This will first attempt to send the messages to all plugins. If no plugins set e.Eat to true on the message, it will then simply call InvokeChatParser.
+        /// </summary>
+        /// <param name="cmd"></param>
+        public static void DispatchChatToBoxWithPluginIntercept(string cmd)
+        {
+            if (!Decal_DispatchOnChatCommand(cmd))
+                CoreManager.Current.Actions.InvokeChatParser(cmd);
+        }
+
 
         public LoggerImpl(GlobalProvider globals)
         {
             _instance = this;
             _globals = globals;
             _scope = "Default";
+        }
+
+        public void Think(string message, string name)
+        {
+            try
+            {
+                DispatchChatToBoxWithPluginIntercept(string.Format("/tell {0}, {1}", name, message));
+            }
+            catch (Exception ex) { Error(ex); }
         }
 
         public void WriteToWindow(string message)
